@@ -1,7 +1,7 @@
 {
     "name": "EdisonInternational Tag Workflow",
     "description": "Automatic semantic versioning on push to main.",
-    "iconName": "edison",
+    "iconName": "SCE_Favicon",
     "categories": [
         "utilities"
     ]
