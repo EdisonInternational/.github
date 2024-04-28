@@ -44,6 +44,7 @@ jobs:
     if: inputs.component == 'bicep'
     with:
         VERSION: ${{ github.ref_name }}
+        #BICEP_FOLDER:
     secrets: inherit
 
   build-reactnative:
@@ -51,6 +52,7 @@ jobs:
     if: inputs.component == 'reactnative'
     with:
        VERSION: ${{ github.ref_name }}
+       #PROJECT:
     secrets: inherit
 
   build-ios:
