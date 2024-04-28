@@ -35,7 +35,7 @@ permissions:
 
 jobs:
   check-github:
-    uses: EdisonInternational/actions/.github/workflows/check-github.yml@main
+    uses: EdisonInternational/actions/.github/workflows/check-github.yml@1
   #
   # Build jobs for each component
   #
