@@ -23,7 +23,7 @@ on:
         description: Component
         options:
         - bicep
-        - webapp-dotnet
+        - dotnet
         - webapp-maven
         - reactnative
         - ios
@@ -45,14 +45,6 @@ jobs:
     with:
         VERSION: ${{ github.ref_name }}
     secrets: inherit
-  
-  build-java:
-    uses: EdisonInternational/actions/.github/workflows/build-webapp-maven.yml@1
-    if: inputs.component == 'webapp-maven'
-    with:
-        VERSION: ${{ github.ref_name }}
-        SONAR_PROJECT_KEY: HelloWorld
-    secrets: inherit
 
   build-reactnative:
     uses: EdisonInternational/actions/.github/workflows/build-reactnative.yml@1
@@ -65,17 +57,28 @@ jobs:
     uses: EdisonInternational/actions/.github/workflows/build-ios.yml@1
     if: inputs.component == 'ios'
     with:
+       VERSION: ${{ github.ref_name }}
        PROJECT: HelloWorldIOS
        SCHEME: HelloWorldIOS
-       CONFIGURATION: ${{ inputs.CONFIGURATION }}
-       VERSION: ${{ github.ref_name }}
+       #CONFIGURATION:
+       #DESTINATION:
     secrets: inherit
 
   build-dotnet:
     uses: EdisonInternational/actions/.github/workflows/build-dotnet.yml@1
-    if: inputs.component == 'webapp-dotnet'
+    if: inputs.component == 'dotnet'
     with:
         VERSION: ${{ github.ref_name }}
         SONAR_PROJECT_KEY: HelloWorld
         TEST_PATH: HelloWorld-DotNet-WebApp_UnitTests
+    secrets: inherit
+  
+  build-java:
+    uses: EdisonInternational/actions/.github/workflows/build-webapp-maven.yml@1
+    if: inputs.component == 'webapp-maven'
+    with:
+        VERSION: ${{ github.ref_name }}
+        #SONAR_PROJECT_KEY:
+        #PROJECT:
+        #JAVA_VERSION:
     secrets: inherit
