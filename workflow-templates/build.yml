@@ -1,0 +1,81 @@
+#
+# Build
+#
+# Each component of the application is built in a separate job.
+#
+# Reusable build will...
+#  1. Package for deployment
+#  2. Run unit tests, if supported (outputs Junit artifacts)
+#  3. Run quality scan, if supported
+#  4. Sign packages, if supported
+#  5. Generate hashes for packages
+#  6. Upload build artifacts and release assets
+#
+# Delete unneeded jobs
+#
+name: Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      component:
+        type: choice
+        description: Component
+        options:
+        - bicep
+        - webapp-dotnet
+        - webapp-maven
+        - reactnative
+        - ios
+
+permissions:
+  contents: write
+  actions: read
+  checks: write
+
+jobs:
+  check-github:
+    uses: EdisonInternational/actions/.github/workflows/check-github.yml@main
+  #
+  # Build jobs for each component
+  #
+  build-bicep:
+    uses: EdisonInternational/actions/.github/workflows/build-bicep.yml@1
+    if: inputs.component == 'bicep'
+    with:
+        VERSION: ${{ github.ref_name }}
+    secrets: inherit
+  
+  build-java:
+    uses: EdisonInternational/actions/.github/workflows/build-webapp-maven.yml@1
+    if: inputs.component == 'webapp-maven'
+    with:
+        VERSION: ${{ github.ref_name }}
+        SONAR_PROJECT_KEY: HelloWorld
+    secrets: inherit
+
+  build-reactnative:
+    uses: EdisonInternational/actions/.github/workflows/build-reactnative.yml@1
+    if: inputs.component == 'reactnative'
+    with:
+       VERSION: ${{ github.ref_name }}
+    secrets: inherit
+
+  build-ios:
+    uses: EdisonInternational/actions/.github/workflows/build-ios.yml@1
+    if: inputs.component == 'ios'
+    with:
+       PROJECT: HelloWorldIOS
+       SCHEME: HelloWorldIOS
+       CONFIGURATION: ${{ inputs.CONFIGURATION }}
+       VERSION: ${{ github.ref_name }}
+    secrets: inherit
+
+  build-dotnet:
+    uses: EdisonInternational/actions/.github/workflows/build-dotnet.yml@1
+    if: inputs.component == 'webapp-dotnet'
+    with:
+        VERSION: ${{ github.ref_name }}
+        SONAR_PROJECT_KEY: HelloWorld
+        TEST_PATH: HelloWorld-DotNet-WebApp_UnitTests
+    secrets: inherit
