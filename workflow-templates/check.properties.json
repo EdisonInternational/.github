@@ -1,0 +1,8 @@
+{
+    "name": "Check",
+    "description": "SonarQube scan for many languages.",
+    "iconName": "SCE_Favicon",
+    "categories": [
+        "utilities"
+    ]
+}
