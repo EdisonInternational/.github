@@ -1,0 +1,23 @@
+#
+# Run Checks
+#
+name: Check
+
+on:
+  workflow_dispatch:
+  pull_request:
+
+permissions:
+  contents: read
+  actions: read
+  checks: write
+
+jobs:
+  #
+  # Run SonarQube scan
+  #
+  check-sonar-generic:
+    uses: EdisonInternational/actions/.github/workflows/check-sonar-generic.yml@main
+    with:
+        VERSION: ${{ github.ref_name }}
+    secrets: inherit
