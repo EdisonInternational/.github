@@ -42,17 +42,17 @@ jobs:
   build-bicep:
     uses: EdisonInternational/actions/.github/workflows/build-bicep.yml@1
     if: inputs.component == 'bicep'
-    with:
-        #VERSION: 1.0.0          (optional, default=github.ref_name)
-        #BICEP_FOLDER:
+    #with:
+    #    VERSION: 1.0.0          (optional, default=github.ref_name)
+    #    BICEP_FOLDER:
     secrets: inherit
 
   build-reactnative:
     uses: EdisonInternational/actions/.github/workflows/build-reactnative.yml@1
     if: inputs.component == 'reactnative'
-    with:
-       #VERSION: 1.0.0          (optional, default=github.ref_name)
-       #PROJECT:
+    #with:
+    #   VERSION: 1.0.0          (optional, default=github.ref_name)
+    #   PROJECT:
     secrets: inherit
 
   build-ios:
@@ -78,8 +78,8 @@ jobs:
   build-java:
     uses: EdisonInternational/actions/.github/workflows/build-webapp-maven.yml@1
     if: inputs.component == 'webapp-maven'
-    with:
-        #VERSION: 1.0.0          (optional, default=github.ref_name)
-        #PROJECT:
-        #JAVA_VERSION:
+    #with:
+    #    VERSION: 1.0.0          (optional, default=github.ref_name)
+    #    PROJECT:
+    #    JAVA_VERSION:
     secrets: inherit
