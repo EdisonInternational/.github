@@ -40,7 +40,7 @@ jobs:
   # Build jobs for each component
   #
   build-bicep:
-    uses: EdisonInternational/actions/.github/workflows/build-bicep.yml@1
+    uses: EdisonInternational/actions/.github/workflows/build-generic.yml@1
     if: inputs.component == 'bicep'
     #with:
     #    VERSION: 1.0.0          (optional, default=github.ref_name)
