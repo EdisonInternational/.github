@@ -1,0 +1,26 @@
+#
+# Tag
+#
+# If the tag is not provided, the action will attempt to bump the patch
+# version.  Otherwise, it will use the provided tag.
+#
+name: 'Tag'
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+    inputs:
+      TAG:
+        type: string
+        description: Custom tag (x.y.z)
+        default: ''
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  tag:
+    uses: EdisonInternational/actions/.github/workflows/tag.yml@main
+    with:
+      TAG: ${{ inputs.TAG }}

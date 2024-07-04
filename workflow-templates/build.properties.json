@@ -1,0 +1,8 @@
+{
+    "name": "Build",
+    "description": "Build template for .Net, Java, iOS, Bicep, React Native",
+    "iconName": "SCE_Favicon",
+    "categories": [
+        "utilities"
+    ]
+}
