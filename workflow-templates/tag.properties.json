@@ -1,8 +1,0 @@
-{
-    "name": "Tag",
-    "description": "Automatic semantic versioning on push to main.",
-    "iconName": "SCE_Favicon",
-    "categories": [
-        "utilities"
-    ]
-}
