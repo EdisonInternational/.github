@@ -75,8 +75,8 @@ jobs:
         TEST_PATH: HelloWorld-DotNet-WebApp_UnitTests
     secrets: inherit
   
-  build-java:
-    uses: EdisonInternational/actions/.github/workflows/build-webapp-maven.yml@1
+  build-java-maven:
+    uses: EdisonInternational/actions/.github/workflows/build-java-maven.yml@1
     if: inputs.component == 'webapp-maven'
     #with:
     #    VERSION: 1.0.0          (optional, default=github.ref_name)
