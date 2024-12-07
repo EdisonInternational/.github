@@ -15,12 +15,13 @@ on:
         description: Custom tag (x.y.z)
         default: ''
 
-permissions:
-  contents: write
-  actions: read
+permissions: read-all
 
 jobs:
   tag:
     uses: EdisonInternational/actions/.github/workflows/tag.yml@main
     with:
       TAG: ${{ inputs.TAG }}
+    permissions:
+      contents: write
+      actions: read
