@@ -1,0 +1,8 @@
+{
+    "name": "Check Dotnet",
+    "description": "SonarQube scan for many Dotnet.",
+    "iconName": "SCE_Favicon",
+    "categories": [
+        "utilities"
+    ]
+}
