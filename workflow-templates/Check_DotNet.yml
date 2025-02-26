@@ -1,0 +1,20 @@
+name: Check_DotNet
+
+on:
+  workflow_dispatch:
+  pull_request:
+
+jobs:
+  check-sonar-generic:
+    uses: EdisonInternational/actions/.github/workflows/check-sonar-dotnet.yml@lopezr17-patch-1
+    with:
+      # Read from repository/org variables. Fallbacks shown as examples:
+      PROJECT: ${{ vars.PROJECT_PATH || '.' }}
+      DOTNET_VERSION: ${{ vars.DOTNET_VERSION || '8' }}
+      SONAR_PROJECT_KEY: ${{ vars.SONAR_PROJECT_KEY || github.event.repository.name }}
+      SONAR_PROJECT_NAME: ${{ vars.SONAR_PROJECT_NAME || github.event.repository.name }}
+    secrets: inherit
+    permissions:
+      contents: read
+      actions: read
+      checks: write
