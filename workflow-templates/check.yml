@@ -15,7 +15,7 @@ jobs:
     uses: EdisonInternational/actions/.github/workflows/check-sonar-generic.yml@main
     with:
       PROJECT: ${{ vars.PROJECT_PATH || '.' }}
-      SONAR_EXCLUSIONS: ${{ SONAR_EXCLUSIONS || '' }}
+      SONAR_EXCLUSIONS: ${{ vars.SONAR_EXCLUSIONS || '' }}
     secrets: inherit
     permissions:
       contents: read
