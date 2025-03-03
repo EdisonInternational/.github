@@ -1,0 +1,20 @@
+name: Check_Maven
+
+on:
+  workflow_dispatch:
+  pull_request:
+
+jobs:
+  check-sonar-generic:
+    uses: EdisonInternational/actions/.github/workflows/check-sonar-maven.yml@main
+    with:
+      # Read from repository/org variables. Fallbacks shown as examples:
+      PROJECT: ${{ vars.PROJECT_PATH || '.' }}
+      JAVA_VERSION: ${{ vars.JAVA_VERSION || '8' }}
+      # Save the SONAR_EXCLUSIONS as an action repository variable with a comma ',' between different paths
+      MAVEN_SKIP_TESTS: "${{ vars.MAVEN_SKIP_TESTS || '' }}"
+    secrets: inherit
+    permissions:
+      contents: read
+      actions: read
+      checks: write
