@@ -12,7 +12,7 @@ jobs:
       PROJECT: ${{ vars.PROJECT_PATH || '.' }}
       JAVA_VERSION: ${{ vars.JAVA_VERSION || '8' }}
       # Save the SONAR_EXCLUSIONS as an action repository variable with a comma ',' between different paths
-      MAVEN_SKIP_TESTS: "${{ vars.MAVEN_SKIP_TESTS || '' }}"
+      MAVEN_SKIP_TESTS: "${{ vars.MAVEN_SKIP_TESTS || 'false' }}"
     secrets: inherit
     permissions:
       contents: read
