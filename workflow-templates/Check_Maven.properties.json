@@ -1,0 +1,8 @@
+{
+    "name": "Check Maven",
+    "description": "SonarQube scan for many Maven.",
+    "iconName": "SCE_Favicon",
+    "categories": [
+        "utilities"
+    ]
+}
