@@ -12,7 +12,7 @@ jobs:
       PROJECT: ${{ vars.PROJECT_PATH || '.' }}
       DOTNET_VERSION: ${{ vars.DOTNET_VERSION || '8' }}
       # Save the SONAR_EXCLUSIONS as an action repository variable with a comma ',' between different paths
-      SONAR_EXCLUSIONS: "\"${{ vars.SONAR_EXCLUSIONS || '' }}\""
+      SONAR_EXCLUSIONS: "${{ vars.SONAR_EXCLUSIONS || '' }}"
     secrets: inherit
     permissions:
       contents: read
