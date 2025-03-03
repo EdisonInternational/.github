@@ -1,6 +1,6 @@
 {
     "name": "Check Ant",
-    "description": "SonarQube scan for Ant.",
+    "description": "SonarQube scan for Ant project.",
     "iconName": "SCE_Favicon",
     "categories": [
         "utilities"
