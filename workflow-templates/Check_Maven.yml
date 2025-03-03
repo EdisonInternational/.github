@@ -11,7 +11,7 @@ jobs:
       # Read from repository/org variables. Fallbacks shown as examples:
       PROJECT: ${{ vars.PROJECT_PATH || '.' }}
       JAVA_VERSION: ${{ vars.JAVA_VERSION || '' }}
-      # Save the SONAR_EXCLUSIONS as an action repository variable with a comma ',' between different paths
+      
       MAVEN_SKIP_TESTS: "${{ vars.MAVEN_SKIP_TESTS || '' }}"
     secrets: inherit
     permissions:
