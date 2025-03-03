@@ -1,6 +1,6 @@
 {
     "name": "Check Dotnet",
-    "description": "SonarQube scan for many Dotnet.",
+    "description": "SonarQube scan for many Dotnet project.",
     "iconName": "SCE_Favicon",
     "categories": [
         "utilities"
