@@ -1,8 +1,0 @@
-{
-    "name": "Check XCode",
-    "description": "SonarQube scan for XCode",
-    "iconName": "SCE_Favicon",
-    "categories": [
-        "utilities"
-    ]
-}

@@ -1,6 +1,10 @@
 #
 # Run Checks
 #
+# Delete any unused job steps.
+# Use "generic" unless a language-specific scanner is available.
+# Use SONAR_EXCLUSIONS to exclude large SQL directories or third-party JavaScript packages.
+#
 name: Check
 
 on:
@@ -9,16 +13,83 @@ on:
 
 jobs:
   #
-  # Run SonarQube scan
+  # Generic SonarQube Scan (TypeScript, Python, sql, sh, etc.)
   #
   check-sonar-generic:
     uses: EdisonInternational/actions/.github/workflows/check-sonar-generic.yml@main
-    with:
-      PROJECT: ${{ vars.PROJECT_PATH || '.' }}
-      # Save the SONAR_EXCLUSIONS as an action repository variable with a comma ',' between different paths
-      SONAR_EXCLUSIONS: ${{ vars.SONAR_EXCLUSIONS || '' }}
+    # ** All parameters are optional **
+    #with:
+    #  PROJECT: 'The path of the project.  Default is "."'
+    #  SONAR_EXCLUSIONS: '**/path1,**/path2'
+    #  PROJECT: 'The path of the project.  Default is "."'
+    #  VERSION: 'The version of the code (eg. x.y.z).  Default is github.ref_name'
+    #  SONAR_PROJECT_KEY: 'The SonarQube project key.  Default is the repo name.'
+    #  SONAR_PROJECT_NAME: 'The SonarQube project name.  Default is the repo name.'
+    #  SONAR_EXCLUSIONS: 'The files to exclude (eg., **/**.sql).'
+    #  SONAR_SOURCES: 'Source Code to be Scanned'
+    #  SONAR_ADDITIONAL_ARGS: 'Additional paramters, if any'
+    #  QUALITY_GATE_CHECK: 'Check the Quality Gate status.  Default is false.'
     secrets: inherit
     permissions:
       contents: read
       actions: read
       checks: write
+  #
+  # Maven SonarQube Scan (Java .pom file)
+  #
+  # check-sonar-maven:
+  #   uses: EdisonInternational/actions/.github/workflows/check-sonar-maven.yml@main
+  #   ** All parameters are optional **
+  #  with:
+  #    PROJECT: 'The .pom file or path to the .pom file.'
+  #    VERSION: 'The version of the code (eg. x.y.z).  Default is github.ref_name'
+  #    SONAR_PROJECT_KEY: 'The SonarQube project.  Default is the repo name.'
+  #    SONAR_PROJECT_NAME: 'The SonarQube name.  Default is the repo name.'
+  #    JAVA_VERSION: 'The Java version to use.  Default is latest (currently Microsoft OpenJDK 17).'
+  #    MAVEN_SKIP_TESTS: 'Skip tests if no access to test resources.'
+  #   secrets: inherit
+  #   permissions:
+  #     contents: read
+  #     actions: read
+  #     checks: write
+
+  #
+  # DotNet SonarQube Scan
+  #
+  # check-sonar-dotnet:
+  #   uses: EdisonInternational/actions/.github/workflows/check-sonar-dotnet.yml@main
+  #   ** All parameters are optional **
+  #   with:
+  #    PROJECT: 'The path of the project.  Default is "."'
+  #    VERSION: 'The version of the code (eg. x.y.z).  Default is github.ref_name'
+  #    DOTNET_VERSION: 'The version of .Net Core to use (defaults to latest).'
+  #    SONAR_PROJECT_KEY: 'The Sonar project key.  Defaults to repo name.'
+  #    SONAR_PROJECT_NAME: 'The Sonar project name.  Defaults to repo name.'
+  #   secrets: inherit
+  #   permissions:
+  #     contents: read
+  #     actions: read
+  #     checks: write
+
+  #
+  # XCode SonarQube Scan
+  #
+  # check-sonar-dotnet:
+  #   uses: EdisonInternational/actions/.github/workflows/check-sonar-xcode.yml@main
+  #   ** All parameters are optional **
+  #   with:
+  #    PROJECT: 'The path of the project.  Default is "."'
+  #    VERSION: 'The version of the code (eg. x.y.z).  Default is github.ref_name'
+  #    DOTNET_VERSION: 'The version of .Net Core to use (defaults to latest).'
+  #    SONAR_PROJECT_KEY: 'The Sonar project key.  Defaults to repo name.'
+  #    SONAR_PROJECT_NAME: 'The Sonar project name.  Defaults to repo name.'
+  #    PROJECT: 'The Project name without the ".xcodeproj" suffix.'
+  #    SCHEME: 'The xcodebuild scheme name.'
+  #    DESTINATION: 'xcodebuild test destination string.  Default is "platform=iOS Simulator,name=iPhone 14 Pro".'
+  #    VERSION: 'The version of the code (eg. x.y.z).  Default is github.ref_name'
+  #    SONAR_PROJECT_KEY: 'The SonarQube project.  Default is the repo name.'
+  #   secrets: inherit
+  #   permissions:
+  #     contents: read
+  #     actions: read
+  #     checks: write
