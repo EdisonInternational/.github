@@ -1,0 +1,22 @@
+#
+# Release Notes Generator
+#
+# This workflow automatically generates and appends a table of pull requests
+# to release notes when a release is published. It finds all PRs merged since
+# the last release and formats them into a readable table.
+#
+name: Release Notes
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  update-release-notes:
+    name: Update Release Notes
+    uses: EdisonInternational/actions/.github/workflows/release-notes.yml@main
+    secrets: inherit
