@@ -1,0 +1,8 @@
+{
+    "name": "Release Notes",
+    "description": "Generate release notes on publish of release.",
+    "iconName": "SCE_Favicon",
+    "categories": [
+        "utilities"
+    ]
+}
