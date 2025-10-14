@@ -16,7 +16,7 @@ jobs:
   # Generic SonarQube Scan (TypeScript, Python, sql, sh, etc.)
   #
   check-sonar-generic:
-    uses: EdisonInternational/actions/.github/workflows/check-sonar-generic.yml@main
+    uses: EdisonInternational/actions/.github/workflows/check-sonar-generic2.yml@2
     # ** All parameters are optional **
     #with:
     #  PROJECT: 'The path of the project.  Default is "."'
@@ -34,11 +34,12 @@ jobs:
       contents: read
       actions: read
       checks: write
+      pull-requests: write
   #
   # Maven SonarQube Scan (Java .pom file)
   #
   # check-sonar-maven:
-  #   uses: EdisonInternational/actions/.github/workflows/check-sonar-maven.yml@main
+  #   uses: EdisonInternational/actions/.github/workflows/check-sonar-maven.yml@2
   #   ** All parameters are optional **
   #  with:
   #    PROJECT: 'The .pom file or path to the .pom file.'
@@ -57,7 +58,7 @@ jobs:
   # DotNet SonarQube Scan
   #
   # check-sonar-dotnet:
-  #   uses: EdisonInternational/actions/.github/workflows/check-sonar-dotnet.yml@main
+  #   uses: EdisonInternational/actions/.github/workflows/check-sonar-dotnet.yml@2
   #   ** All parameters are optional **
   #   with:
   #    PROJECT: 'The path of the project.  Default is "."'
@@ -75,7 +76,7 @@ jobs:
   # XCode SonarQube Scan
   #
   # check-sonar-dotnet:
-  #   uses: EdisonInternational/actions/.github/workflows/check-sonar-xcode.yml@main
+  #   uses: EdisonInternational/actions/.github/workflows/check-sonar-xcode.yml@2
   #   ** All parameters are optional **
   #   with:
   #    PROJECT: 'The path of the project.  Default is "."'
