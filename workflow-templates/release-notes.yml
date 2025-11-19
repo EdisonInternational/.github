@@ -11,13 +11,13 @@ on:
   release:
     types: [published]
 
-permissions:
-  contents: write
-  pull-requests: read
-  issues: read
-
 jobs:
   update-release-notes:
     name: Update Release Notes
-    uses: EdisonInternational/actions/.github/workflows/release-notes.yml@main
+    uses: EdisonInternational/actions/.github/workflows/release-notes.yml@v2
     secrets: inherit
+    permissions:
+      contents: write
+      pull-requests: read
+      issues: read
+      security-events: read
