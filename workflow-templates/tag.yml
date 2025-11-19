@@ -1,8 +1,8 @@
 #
 # Tag
 #
-# If the tag is not provided, the action will attempt to bump the patch
-# version.  Otherwise, it will use the provided tag.
+# If the tag is not provided, the action will attempt to bump the patch version.  Otherwise,
+# it will use the provided tag.
 #
 name: 'Tag'
 on:
@@ -19,9 +19,9 @@ permissions: read-all
 
 jobs:
   tag:
-    uses: EdisonInternational/actions/.github/workflows/tag.yml@main
+    uses: EdisonInternational/actions/.github/workflows/tag.yml@v2
     with:
       TAG: ${{ inputs.TAG }}
     permissions:
-      contents: write
       actions: read
+      contents: write
