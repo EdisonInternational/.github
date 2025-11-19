@@ -16,7 +16,7 @@ jobs:
   # Generic SonarQube Scan (TypeScript, Python, sql, sh, etc.)
   #
   check-sonar-generic:
-    uses: EdisonInternational/actions/.github/workflows/check-sonar-generic2.yml@2
+    uses: EdisonInternational/actions/.github/workflows/check-sonar-generic2.yml@v2
     # ** All parameters are optional **
     #with:
     #  PROJECT: 'The path of the project.  Default is "."'
@@ -58,7 +58,7 @@ jobs:
   # DotNet SonarQube Scan
   #
   # check-sonar-dotnet:
-  #   uses: EdisonInternational/actions/.github/workflows/check-sonar-dotnet.yml@2
+  #   uses: EdisonInternational/actions/.github/workflows/check-sonar-dotnet.yml@v2
   #   ** All parameters are optional **
   #   with:
   #    PROJECT: 'The path of the project.  Default is "."'
@@ -76,7 +76,7 @@ jobs:
   # XCode SonarQube Scan
   #
   # check-sonar-dotnet:
-  #   uses: EdisonInternational/actions/.github/workflows/check-sonar-xcode.yml@2
+  #   uses: EdisonInternational/actions/.github/workflows/check-sonar-xcode.yml@v2
   #   ** All parameters are optional **
   #   with:
   #    PROJECT: 'The path of the project.  Default is "."'
