@@ -1,3 +1,4 @@
+---
 #
 # Release Notes Generator
 #
@@ -14,10 +15,10 @@ on:
 jobs:
   update-release-notes:
     name: Update Release Notes
-    uses: EdisonInternational/actions/.github/workflows/release-notes.yml@v2
+    uses: EdisonInternational/actions/.github/workflows/release-notes2.yml@v2
     secrets: inherit
     permissions:
       contents: write
-      pull-requests: read
-      issues: read
+      pull-requests: write
+      issues: write
       security-events: read
