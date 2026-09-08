@@ -1,7 +1,7 @@
 name: Build Requirements
 description: Request a new build pipeline or report build requirements for a repository
 title: "[BUILD] "
-labels: ["build", "needs-triage", "agentic-workflow"]
+labels: ["build", "needs-triage", "agentic-workflow:build"]
 body:
   - type: markdown
     attributes:
