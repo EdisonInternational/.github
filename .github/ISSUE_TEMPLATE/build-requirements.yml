@@ -1,0 +1,59 @@
+name: Build Requirements
+description: Request a new build pipeline or report build requirements for a repository
+title: "[BUILD] "
+labels: ["build", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form to submit build requirements for a repository. This template is shared across the organization.
+
+  - type: dropdown
+    id: language
+    attributes:
+      label: Language
+      description: Select the primary language/build system for this repository.
+      options:
+        - Java Maven
+        - NodeJS
+        - .Net
+        - Python
+    validations:
+      required: true
+
+  - type: input
+    id: cmdb-product-name
+    attributes:
+      label: CMDB Product Name
+      description: The Product Name as registered in CMDB.
+      placeholder: e.g. Customer Billing Portal
+    validations:
+      required: true
+
+  - type: dropdown
+    id: cmdb-ci-type
+    attributes:
+      label: CMDB CI Type
+      description: The Configuration Item type as registered in CMDB.
+      options:
+        - Application
+        - Application Service
+    validations:
+      required: true
+
+  - type: input
+    id: repository-name
+    attributes:
+      label: Repository Name
+      description: The name of the repository the build is for.
+      placeholder: e.g. org/repo-name
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional-details
+    attributes:
+      label: Additional Details
+      description: Any other build requirements or context (e.g. branch strategy, deployment targets, dependencies).
+    validations:
+      required: false
