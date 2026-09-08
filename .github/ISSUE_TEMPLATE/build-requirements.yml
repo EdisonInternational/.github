@@ -1,7 +1,7 @@
 name: Build Requirements
 description: Request a new build pipeline or report build requirements for a repository
 title: "[BUILD] "
-labels: ["build", "needs-triage"]
+labels: ["build", "needs-triage", "agentic-workflow"]
 body:
   - type: markdown
     attributes:
@@ -12,12 +12,10 @@ body:
     id: language
     attributes:
       label: Language
-      description: Select the primary language/build system for this repository.
+      description: Select the primary language/build system for this repository. Only NodeJS and .Net are currently supported by the DevOps CI Builder agentic workflow.
       options:
-        - Java Maven
         - NodeJS
         - .Net
-        - Python
     validations:
       required: true
 
@@ -57,3 +55,13 @@ body:
       description: Any other build requirements or context (e.g. branch strategy, deployment targets, dependencies).
     validations:
       required: false
+
+  - type: dropdown
+    id: target-agent
+    attributes:
+      label: Target Agentic Workflow
+      description: The agentic AI workflow that should pick up and action this issue.
+      options:
+        - DevOps CI Builder
+    validations:
+      required: true
