@@ -1,0 +1,79 @@
+---
+#
+# Build Request Dispatch (Reusable Workflow Call)
+#
+# Alternative to build-request-dispatch.yml that avoids the REST API
+# dispatch-and-poll pattern. Instead, this calls
+# generate-caller-workflow-master-reusable.yml in EdisonInternational/agents
+# directly as a reusable workflow (`uses:`), letting GitHub Actions itself
+# wait for completion.
+#
+# No PAT is needed: target_repo is always this repo (the caller), and a
+# reusable workflow's GITHUB_TOKEN is scoped to the caller, not to the repo
+# where the called workflow's YAML lives. This requires
+# generate-caller-workflow-master-reusable.yml to use GITHUB_TOKEN (not
+# WORKFLOW_PAT) for its checkout/PR steps.
+#
+# The ref is pinned to `main` because reusable workflow refs in `uses:`
+# must be static and cannot come from a variable/expression.
+#
+name: Build Request Dispatch (Reusable Workflow)
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  issues: write
+  contents: write
+  pull-requests: write
+  actions: read
+
+jobs:
+  parse-issue:
+    if: contains(github.event.issue.labels.*.name, 'Self-Service')
+    runs-on: ubuntu-latest
+    outputs:
+      technology: ${{ steps.parse.outputs.technology }}
+      target_repo: ${{ steps.parse.outputs.target_repo }}
+      target_branch: ${{ steps.parse.outputs.target_branch }}
+    steps:
+      - name: Parse issue form fields
+        id: parse
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = context.payload.issue.body || '';
+            function extractField(label) {
+              const regex = new RegExp(`### ${label}\\s*\\n+([^\\n]+)`);
+              const match = body.match(regex);
+              return match ? match[1].trim() : '';
+            }
+            const technologyByLanguage = {
+              'NodeJS': 'node',
+              '.Net': 'dotnet',
+            };
+            const language = extractField('Language');
+            const repositoryName = extractField('Repository Name');
+            const targetBranch = extractField('Target Branch');
+            const technology = technologyByLanguage[language];
+            if (!technology) {
+              core.setFailed(`Unsupported or missing Language: "${language}"`);
+              return;
+            }
+            if (!repositoryName || repositoryName === '_No response_') {
+              core.setFailed('Repository Name is required');
+              return;
+            }
+            // basename strips any "org/" prefix so only the repo name is sent
+            const target_repo = repositoryName.split('/').pop();
+            core.setOutput('technology', technology);
+            core.setOutput('target_repo', target_repo);
+            core.setOutput('target_branch', (!targetBranch || targetBranch === '_No response_') ? 'main' : targetBranch);
+  trigger-devops-ci-builder:
+    needs: parse-issue
+    uses: EdisonInternational/agents/.github/workflows/generate-caller-workflow-master-reusable.yml@reusable-caller-workflow
+    with:
+      technology: ${{ needs.parse-issue.outputs.technology }}
+      target_repo: ${{ needs.parse-issue.outputs.target_repo }}
+      target_branch: ${{ needs.parse-issue.outputs.target_branch }}
