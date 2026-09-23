@@ -37,6 +37,17 @@ jobs:
       technology: ${{ steps.parse.outputs.technology }}
       target_repo: ${{ steps.parse.outputs.target_repo }}
       target_branch: ${{ steps.parse.outputs.target_branch }}
+      project: ${{ steps.parse.outputs.project }}
+      component: ${{ steps.parse.outputs.component }}
+      unit_test_path: ${{ steps.parse.outputs.unit_test_path }}
+      app_type: ${{ steps.parse.outputs.app_type }}
+      node_version: ${{ steps.parse.outputs.node_version }}
+      legacy_peer_deps: ${{ steps.parse.outputs.legacy_peer_deps }}
+      additional_input: ${{ steps.parse.outputs.additional_input }}
+      sonar_sources: ${{ steps.parse.outputs.sonar_sources }}
+      test_command: ${{ steps.parse.outputs.test_command }}
+      quality_gate_check: ${{ steps.parse.outputs.quality_gate_check }}
+      coverage_exclusions: ${{ steps.parse.outputs.coverage_exclusions }}
     steps:
       - name: Parse issue form fields
         id: parse
@@ -47,29 +58,53 @@ jobs:
             function extractField(label) {
               const regex = new RegExp(`### ${label}\\s*\\n+([^\\n]+)`);
               const match = body.match(regex);
-              return match ? match[1].trim() : '';
+              const value = match ? match[1].trim() : '';
+              return (!value || value === '_No response_') ? '' : value;
             }
-            const technologyByLanguage = {
-              'NodeJS': 'node',
-              '.Net': 'dotnet',
-            };
-            const language = extractField('Language');
-            const repositoryName = extractField('Repository Name');
+            function extractCheckbox(label) {
+              return /\[x\]/i.test(extractField(label));
+            }
+
+            const technology = extractField('Technology');
+            const targetRepoRaw = extractField('Target Repo');
             const targetBranch = extractField('Target Branch');
-            const technology = technologyByLanguage[language];
+            const project = extractField('Project');
+            const component = extractField('Component');
+            const unitTestPath = extractField('Unit Test Path');
+            const appType = extractField('App Type');
+            const nodeVersion = extractField('Node Version');
+            const legacyPeerDeps = extractCheckbox('Legacy Peer Deps');
+            const additionalInput = extractField('Additional Input');
+            const sonarSources = extractField('Sonar Sources');
+            const testCommand = extractField('Test Command');
+            const qualityGateCheck = extractCheckbox('Quality Gate Check');
+            const coverageExclusions = extractField('Coverage Exclusions');
+
             if (!technology) {
-              core.setFailed(`Unsupported or missing Language: "${language}"`);
+              core.setFailed(`Unsupported or missing Technology: "${technology}"`);
               return;
             }
-            if (!repositoryName || repositoryName === '_No response_') {
-              core.setFailed('Repository Name is required');
+            if (!targetRepoRaw) {
+              core.setFailed('Target Repo is required');
               return;
             }
             // basename strips any "org/" prefix so only the repo name is sent
-            const target_repo = repositoryName.split('/').pop();
+            const target_repo = targetRepoRaw.split('/').pop();
+
             core.setOutput('technology', technology);
             core.setOutput('target_repo', target_repo);
-            core.setOutput('target_branch', (!targetBranch || targetBranch === '_No response_') ? 'main' : targetBranch);
+            core.setOutput('target_branch', targetBranch || 'main');
+            core.setOutput('project', project || '.');
+            core.setOutput('component', component);
+            core.setOutput('unit_test_path', unitTestPath);
+            core.setOutput('app_type', appType);
+            core.setOutput('node_version', nodeVersion);
+            core.setOutput('legacy_peer_deps', legacyPeerDeps);
+            core.setOutput('additional_input', additionalInput);
+            core.setOutput('sonar_sources', sonarSources);
+            core.setOutput('test_command', testCommand);
+            core.setOutput('quality_gate_check', qualityGateCheck);
+            core.setOutput('coverage_exclusions', coverageExclusions);
   trigger-devops-ci-builder:
     needs: parse-issue
     uses: EdisonInternational/agents/.github/workflows/generate-caller-workflow-master-reusable.yml@reusable-caller-workflow
@@ -77,3 +112,14 @@ jobs:
       technology: ${{ needs.parse-issue.outputs.technology }}
       target_repo: ${{ needs.parse-issue.outputs.target_repo }}
       target_branch: ${{ needs.parse-issue.outputs.target_branch }}
+      project: ${{ needs.parse-issue.outputs.project }}
+      component: ${{ needs.parse-issue.outputs.component }}
+      unit_test_path: ${{ needs.parse-issue.outputs.unit_test_path }}
+      app_type: ${{ needs.parse-issue.outputs.app_type }}
+      node_version: ${{ needs.parse-issue.outputs.node_version }}
+      legacy_peer_deps: ${{ needs.parse-issue.outputs.legacy_peer_deps == 'true' }}
+      additional_input: ${{ needs.parse-issue.outputs.additional_input }}
+      sonar_sources: ${{ needs.parse-issue.outputs.sonar_sources }}
+      test_command: ${{ needs.parse-issue.outputs.test_command }}
+      quality_gate_check: ${{ needs.parse-issue.outputs.quality_gate_check == 'true' }}
+      coverage_exclusions: ${{ needs.parse-issue.outputs.coverage_exclusions }}
