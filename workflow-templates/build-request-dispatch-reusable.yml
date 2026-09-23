@@ -75,7 +75,12 @@ jobs:
             const appType = extractField('App Type');
             const nodeVersion = extractField('Node Version');
             const legacyPeerDeps = extractCheckbox('Legacy Peer Deps');
-            const additionalInput = extractField('Additional Input');
+            const targetEnv = extractField('Target Env');
+            const assetName = extractField('Asset Name');
+            const additionalInput = [
+              targetEnv && `target_env: ${targetEnv}`,
+              assetName && `asset_name: ${assetName}`,
+            ].filter(Boolean).join(', ');
             const sonarSources = extractField('Sonar Sources');
             const testCommand = extractField('Test Command');
             const qualityGateCheck = extractCheckbox('Quality Gate Check');

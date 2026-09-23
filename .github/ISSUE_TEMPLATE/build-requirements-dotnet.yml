@@ -48,11 +48,31 @@ body:
       required: false
 
   - type: input
-    id: additional_input
+    id: target_env
     attributes:
-      label: Additional Input
-      description: Any additional key/value pairs required by the build.
-      placeholder: "target_env: qa, asset_name: self-service-dotnet-webapp-st"
+      label: Target Env
+      description: The target environment for this build.
+      placeholder: qa
+    validations:
+      required: false
+
+  - type: input
+    id: asset_name
+    attributes:
+      label: Asset Name
+      description: The asset name to use for this build.
+      placeholder: self-service-dotnet-webapp-st
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional_params
+    attributes:
+      label: Additional Parameters
+      description: Any extra key/value pairs required by the build, one per line.
+      placeholder: |
+        key1: value1
+        key2: value2
     validations:
       required: false
 
