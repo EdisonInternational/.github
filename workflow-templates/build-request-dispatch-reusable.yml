@@ -48,6 +48,7 @@ jobs:
       test_command: ${{ steps.parse.outputs.test_command }}
       quality_gate_check: ${{ steps.parse.outputs.quality_gate_check }}
       coverage_exclusions: ${{ steps.parse.outputs.coverage_exclusions }}
+      dotnet_project_name: ${{ steps.parse.outputs.dotnet_project_name }}
     steps:
       - name: Parse issue form fields
         id: parse
@@ -79,6 +80,7 @@ jobs:
             const testCommand = extractField('Test Command');
             const qualityGateCheck = extractCheckbox('Quality Gate Check');
             const coverageExclusions = extractField('Coverage Exclusions');
+            const dotnetProjectName = extractField('Project Name');
 
             if (!technology) {
               core.setFailed(`Unsupported or missing Technology: "${technology}"`);
@@ -105,6 +107,7 @@ jobs:
             core.setOutput('test_command', testCommand);
             core.setOutput('quality_gate_check', qualityGateCheck);
             core.setOutput('coverage_exclusions', coverageExclusions);
+            core.setOutput('dotnet_project_name', dotnetProjectName);
   trigger-devops-ci-builder:
     needs: parse-issue
     uses: EdisonInternational/agents/.github/workflows/generate-caller-workflow-master-reusable.yml@reusable-caller-workflow
@@ -123,3 +126,4 @@ jobs:
       test_command: ${{ needs.parse-issue.outputs.test_command }}
       quality_gate_check: ${{ needs.parse-issue.outputs.quality_gate_check == 'true' }}
       coverage_exclusions: ${{ needs.parse-issue.outputs.coverage_exclusions }}
+      dotnet_project_name: ${{ needs.parse-issue.outputs.dotnet_project_name }}

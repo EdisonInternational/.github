@@ -56,6 +56,22 @@ body:
       required: false
 
   - type: input
+    id: additional_input
+    attributes:
+      label: Additional Input
+      description: Any additional key/value pairs required by the build.
+      placeholder: "target_env: qa, asset_name: self-service-node-webapp-st"
+    validations:
+      required: false
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ### Node-specific settings
+        Fill in the fields below only if you selected **node** as the Technology above. GitHub issue forms can't hide fields conditionally, so leave these blank for .NET builds.
+
+  - type: input
     id: unit_test_path
     attributes:
       label: Unit Test Path
@@ -77,7 +93,7 @@ body:
     id: node_version
     attributes:
       label: Node Version
-      description: The Node.js version to use. Only applicable when Technology is "node".
+      description: The Node.js version to use.
       placeholder: e.g. 22.11.0
     validations:
       required: false
@@ -88,15 +104,6 @@ body:
       label: Legacy Peer Deps
       options:
         - label: Install npm dependencies with --legacy-peer-deps
-    validations:
-      required: false
-
-  - type: input
-    id: additional_input
-    attributes:
-      label: Additional Input
-      description: Any additional key/value pairs required by the build.
-      placeholder: "target_env: qa, asset_name: self-service-node-webapp-st"
     validations:
       required: false
 
@@ -133,5 +140,21 @@ body:
       label: Coverage Exclusions
       description: Comma-separated glob patterns to exclude from code coverage.
       placeholder: e.g. src/**/*.spec.tsx,src/**/*.d.ts
+    validations:
+      required: false
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ### .NET-specific settings
+        Fill in the field below only if you selected **dotnet** as the Technology above.
+
+  - type: input
+    id: dotnet_project_name
+    attributes:
+      label: Project Name
+      description: The .NET project name.
+      placeholder: e.g. HelloWorld
     validations:
       required: false
