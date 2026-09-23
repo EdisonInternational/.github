@@ -1,21 +1,21 @@
-name: Build Requirements
-description: Request a new build pipeline or report build requirements for a repository
-title: "[BUILD] "
+name: Build Requirements (Node)
+description: Request a new build pipeline or report build requirements for a Node.js repository
+title: "[BUILD][NODE] "
 labels: ["build", "needs-triage", "agentic-workflow:build"]
 body:
   - type: markdown
     attributes:
       value: |
-        Use this form to submit build requirements for a repository. This template is shared across the organization.
+        Use this form to submit Node.js build requirements for a repository. This template is shared across the organization.
 
   - type: dropdown
     id: technology
     attributes:
       label: Technology
-      description: The primary language/build system for this repository. Only "node" and "dotnet" are currently supported by the DevOps CI Builder agentic workflow.
+      description: The primary language/build system for this repository.
       options:
         - node
-        - dotnet
+      default: 0
     validations:
       required: true
 
@@ -63,13 +63,6 @@ body:
       placeholder: "target_env: qa, asset_name: self-service-node-webapp-st"
     validations:
       required: false
-
-  - type: markdown
-    attributes:
-      value: |
-        ---
-        ### Node-specific settings
-        Fill in the fields below only if you selected **node** as the Technology above. GitHub issue forms can't hide fields conditionally, so leave these blank for .NET builds.
 
   - type: input
     id: unit_test_path
@@ -140,21 +133,5 @@ body:
       label: Coverage Exclusions
       description: Comma-separated glob patterns to exclude from code coverage.
       placeholder: e.g. src/**/*.spec.tsx,src/**/*.d.ts
-    validations:
-      required: false
-
-  - type: markdown
-    attributes:
-      value: |
-        ---
-        ### .NET-specific settings
-        Fill in the field below only if you selected **dotnet** as the Technology above.
-
-  - type: input
-    id: dotnet_project_name
-    attributes:
-      label: Project Name
-      description: The .NET project name.
-      placeholder: e.g. HelloWorld
     validations:
       required: false

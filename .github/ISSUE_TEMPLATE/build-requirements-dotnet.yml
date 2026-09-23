@@ -1,0 +1,74 @@
+name: Build Requirements (.NET)
+description: Request a new build pipeline or report build requirements for a .NET repository
+title: "[BUILD][DOTNET] "
+labels: ["build", "needs-triage", "agentic-workflow:build"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form to submit .NET build requirements for a repository. This template is shared across the organization.
+
+  - type: dropdown
+    id: technology
+    attributes:
+      label: Technology
+      description: The primary language/build system for this repository.
+      options:
+        - dotnet
+      default: 0
+    validations:
+      required: true
+
+  - type: input
+    id: target_repo
+    attributes:
+      label: Target Repo
+      description: The name of the repository the build is for.
+      placeholder: e.g. self-service-dotnet-webapp
+    validations:
+      required: true
+
+  - type: input
+    id: target_branch
+    attributes:
+      label: Target Branch
+      description: Branch of the target repository to base the build on. Defaults to "main" if left blank.
+      placeholder: main
+    validations:
+      required: false
+
+  - type: input
+    id: project
+    attributes:
+      label: Project
+      description: The path of the project within the repository. Defaults to "." if left blank.
+      placeholder: "."
+    validations:
+      required: false
+
+  - type: input
+    id: component
+    attributes:
+      label: Component
+      description: The component being built.
+      placeholder: webapp
+    validations:
+      required: false
+
+  - type: input
+    id: additional_input
+    attributes:
+      label: Additional Input
+      description: Any additional key/value pairs required by the build.
+      placeholder: "target_env: qa, asset_name: self-service-dotnet-webapp-st"
+    validations:
+      required: false
+
+  - type: input
+    id: dotnet_project_name
+    attributes:
+      label: Project Name
+      description: The .NET project name.
+      placeholder: e.g. HelloWorld
+    validations:
+      required: false
