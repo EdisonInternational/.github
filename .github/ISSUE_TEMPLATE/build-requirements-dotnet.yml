@@ -8,16 +8,8 @@ body:
       value: |
         Use this form to submit .NET build requirements for a repository. This template is shared across the organization.
 
-  - type: dropdown
-    id: technology
-    attributes:
-      label: Technology
-      description: The primary language/build system for this repository.
-      options:
-        - dotnet
-      default: 0
-    validations:
-      required: true
+        ### Technology
+        dotnet
 
   - type: input
     id: target_repo
