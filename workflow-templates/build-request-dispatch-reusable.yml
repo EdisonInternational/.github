@@ -81,16 +81,17 @@ jobs:
             const appType = extractField('App Type');
             const nodeVersion = extractField('Node Version');
             const legacyPeerDeps = extractCheckbox('Legacy Peer Deps');
-            const targetEnv = extractField('Target Env');
-            const assetName = extractField('Asset Name');
-            // one `key: value` pair per line, added by the user as needed
-            const additionalParamLines = extractMultilineField('Additional Parameters')
-              .split('\n').map(line => line.trim()).filter(Boolean);
-            const additionalInput = [
-              targetEnv && `target_env: ${targetEnv}`,
-              assetName && `asset_name: ${assetName}`,
-              ...additionalParamLines,
-            ].filter(Boolean).join(', ');
+            // one entry per line; rows are paired by index (line 1 of Target Env with line 1 of Asset Name, etc.)
+            const targetEnvs = extractMultilineField('Target Env').split('\n').map(line => line.trim()).filter(Boolean);
+            const assetNames = extractMultilineField('Asset Name').split('\n').map(line => line.trim()).filter(Boolean);
+            const pairCount = Math.max(targetEnvs.length, assetNames.length);
+            const additionalInput = Array.from({ length: pairCount }, (_, i) => {
+              const pair = [
+                targetEnvs[i] && `target_env: ${targetEnvs[i]}`,
+                assetNames[i] && `asset_name: ${assetNames[i]}`,
+              ].filter(Boolean).join(', ');
+              return pair;
+            }).filter(Boolean).join('; ');
             const sonarSources = extractField('Sonar Sources');
             const testCommand = extractField('Test Command');
             const qualityGateCheck = extractCheckbox('Quality Gate Check');

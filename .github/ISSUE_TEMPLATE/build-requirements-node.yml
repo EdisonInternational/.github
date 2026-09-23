@@ -47,32 +47,25 @@ body:
     validations:
       required: false
 
-  - type: input
+  - type: textarea
     id: target_env
     attributes:
       label: Target Env
-      description: The target environment for this build.
-      placeholder: qa
-    validations:
-      required: false
-
-  - type: input
-    id: asset_name
-    attributes:
-      label: Asset Name
-      description: The asset name to use for this build.
-      placeholder: self-service-node-webapp-st
+      description: The target environment(s) for this build. Add one per line to add multiple; paired by row with Asset Name below.
+      placeholder: |
+        qa
+        staging
     validations:
       required: false
 
   - type: textarea
-    id: additional_params
+    id: asset_name
     attributes:
-      label: Additional Parameters
-      description: Any extra key/value pairs required by the build, one per line.
+      label: Asset Name
+      description: The asset name(s) to use for this build. Add one per line, matching the order of Target Env above.
       placeholder: |
-        key1: value1
-        key2: value2
+        self-service-node-webapp-qa
+        self-service-node-webapp-st
     validations:
       required: false
 
