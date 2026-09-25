@@ -47,6 +47,70 @@ body:
     validations:
       required: false
 
+  - type: input
+    id: unit_test_path
+    attributes:
+      label: Unit Test Path
+      description: The path to the unit tests.
+      placeholder: e.g. SelfServiceDotnetWebapp.Api.Tests
+    validations:
+      required: false
+
+  - type: textarea
+    id: sub_projects
+    attributes:
+      label: Sub Projects
+      description: Additional project(s)/csproj path(s) to build. Add one per line for multiple.
+      placeholder: |
+        ADRAPI/ADRAPI/ADRAPI.csproj
+    validations:
+      required: false
+
+  - type: input
+    id: dotnet_version
+    attributes:
+      label: .NET Version
+      description: The .NET SDK version to use.
+      placeholder: e.g. 8.0.x
+    validations:
+      required: false
+
+  - type: input
+    id: build_additional_args
+    attributes:
+      label: Build Additional Args
+      description: Additional arguments to pass to the build/publish command.
+      placeholder: e.g. /p:DeployOnBuild=true /p:PublishProfile=FolderProfile
+    validations:
+      required: false
+
+  - type: input
+    id: publish_command
+    attributes:
+      label: Publish Command
+      description: The MSBuild target used to publish the project.
+      placeholder: e.g. /t:Publish
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: publish
+    attributes:
+      label: Publish
+      options:
+        - label: Publish the build output
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: obj_dir_fallback
+    attributes:
+      label: Obj Dir Fallback
+      options:
+        - label: Fall back to the default obj directory
+    validations:
+      required: false
+
   - type: textarea
     id: target_env
     attributes:
