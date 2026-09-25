@@ -49,6 +49,12 @@ jobs:
       quality_gate_check: ${{ steps.parse.outputs.quality_gate_check }}
       coverage_exclusions: ${{ steps.parse.outputs.coverage_exclusions }}
       dotnet_project_name: ${{ steps.parse.outputs.dotnet_project_name }}
+      sub_projects: ${{ steps.parse.outputs.sub_projects }}
+      dotnet_version: ${{ steps.parse.outputs.dotnet_version }}
+      build_additional_args: ${{ steps.parse.outputs.build_additional_args }}
+      publish_command: ${{ steps.parse.outputs.publish_command }}
+      publish: ${{ steps.parse.outputs.publish }}
+      obj_dir_fallback: ${{ steps.parse.outputs.obj_dir_fallback }}
     steps:
       - name: Parse issue form fields
         id: parse
@@ -97,6 +103,12 @@ jobs:
             const qualityGateCheck = extractCheckbox('Quality Gate Check');
             const coverageExclusions = extractField('Coverage Exclusions');
             const dotnetProjectName = extractField('Project Name');
+            const subProjects = extractField('Sub Projects');
+            const dotnetVersion = extractField('.NET Version');
+            const buildAdditionalArgs = extractField('Build Additional Args');
+            const publishCommand = extractField('Publish Command');
+            const publish = extractCheckbox('Publish');
+            const objDirFallback = extractCheckbox('Obj Dir Fallback');
 
             if (!technology) {
               core.setFailed(`Unsupported or missing Technology: "${technology}"`);
@@ -124,6 +136,12 @@ jobs:
             core.setOutput('quality_gate_check', qualityGateCheck);
             core.setOutput('coverage_exclusions', coverageExclusions);
             core.setOutput('dotnet_project_name', dotnetProjectName);
+            core.setOutput('sub_projects', subProjects);
+            core.setOutput('dotnet_version', dotnetVersion);
+            core.setOutput('build_additional_args', buildAdditionalArgs);
+            core.setOutput('publish_command', publishCommand);
+            core.setOutput('publish', publish);
+            core.setOutput('obj_dir_fallback', objDirFallback);
   trigger-devops-ci-builder:
     needs: parse-issue
     uses: EdisonInternational/agents/.github/workflows/generate-caller-workflow-master-reusable.yml@reusable-caller-workflow
@@ -143,3 +161,9 @@ jobs:
       quality_gate_check: ${{ needs.parse-issue.outputs.quality_gate_check == 'true' }}
       coverage_exclusions: ${{ needs.parse-issue.outputs.coverage_exclusions }}
       dotnet_project_name: ${{ needs.parse-issue.outputs.dotnet_project_name }}
+      sub_projects: ${{ needs.parse-issue.outputs.sub_projects }}
+      dotnet_version: ${{ needs.parse-issue.outputs.dotnet_version }}
+      build_additional_args: ${{ needs.parse-issue.outputs.build_additional_args }}
+      publish_command: ${{ needs.parse-issue.outputs.publish_command }}
+      publish: ${{ needs.parse-issue.outputs.publish == 'true' }}
+      obj_dir_fallback: ${{ needs.parse-issue.outputs.obj_dir_fallback == 'true' }}
