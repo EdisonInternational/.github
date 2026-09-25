@@ -1,0 +1,142 @@
+name: Build Requirements (Node)
+description: Request a new build pipeline or report build requirements for a Node.js repository
+title: "[BUILD][NODE] "
+labels: ["build", "needs-triage", "agentic-workflow:build"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form to submit Node.js build requirements for a repository. This template is shared across the organization.
+
+        ### Technology
+        node
+
+  - type: input
+    id: target_repo
+    attributes:
+      label: Target Repo
+      description: The name of the repository the build is for.
+      placeholder: e.g. self-service-node-webapp
+    validations:
+      required: true
+
+  - type: input
+    id: target_branch
+    attributes:
+      label: Target Branch
+      description: Branch of the target repository to base the build on. Defaults to "main" if left blank.
+      placeholder: main
+    validations:
+      required: false
+
+  - type: input
+    id: project
+    attributes:
+      label: Project
+      description: The path of the project within the repository. Defaults to "." if left blank.
+      placeholder: "."
+    validations:
+      required: false
+
+  - type: input
+    id: component
+    attributes:
+      label: Component
+      description: The component being built.
+      placeholder: webapp
+    validations:
+      required: false
+
+  - type: textarea
+    id: target_env
+    attributes:
+      label: Target Env
+      description: The target environment(s) for this build. Add one per line to add multiple; paired by row with Asset Name below.
+      placeholder: |
+        qa
+        staging
+    validations:
+      required: false
+
+  - type: textarea
+    id: asset_name
+    attributes:
+      label: Asset Name
+      description: The asset name(s) to use for this build. Add one per line, matching the order of Target Env above.
+      placeholder: |
+        self-service-node-webapp-qa
+        self-service-node-webapp-st
+    validations:
+      required: false
+
+  - type: input
+    id: unit_test_path
+    attributes:
+      label: Unit Test Path
+      description: The path to the unit tests.
+      placeholder: tests
+    validations:
+      required: false
+
+  - type: input
+    id: app_type
+    attributes:
+      label: App Type
+      description: The type of application.
+      placeholder: static
+    validations:
+      required: false
+
+  - type: input
+    id: node_version
+    attributes:
+      label: Node Version
+      description: The Node.js version to use.
+      placeholder: e.g. 22.11.0
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: legacy_peer_deps
+    attributes:
+      label: Legacy Peer Deps
+      options:
+        - label: Install npm dependencies with --legacy-peer-deps
+    validations:
+      required: false
+
+  - type: input
+    id: sonar_sources
+    attributes:
+      label: Sonar Sources
+      description: Source code paths to be scanned by SonarQube.
+      placeholder: e.g. src
+    validations:
+      required: false
+
+  - type: input
+    id: test_command
+    attributes:
+      label: Test Command
+      description: The command used to run unit tests.
+      placeholder: e.g. npx jest
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: quality_gate_check
+    attributes:
+      label: Quality Gate Check
+      options:
+        - label: Check the SonarQube Quality Gate status
+    validations:
+      required: false
+
+  - type: input
+    id: coverage_exclusions
+    attributes:
+      label: Coverage Exclusions
+      description: Comma-separated glob patterns to exclude from code coverage.
+      placeholder: e.g. src/**/*.spec.tsx,src/**/*.d.ts
+    validations:
+      required: false
