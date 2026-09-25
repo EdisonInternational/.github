@@ -103,7 +103,7 @@ jobs:
             const qualityGateCheck = extractCheckbox('Quality Gate Check');
             const coverageExclusions = extractField('Coverage Exclusions');
             const dotnetProjectName = extractField('Project Name');
-            const subProjects = extractMultilineField('Sub Projects');
+            const subProjects = extractField('Sub Projects');
             const dotnetVersion = extractField('.NET Version');
             const buildAdditionalArgs = extractField('Build Additional Args');
             const publishCommand = extractField('Publish Command');

@@ -56,13 +56,12 @@ body:
     validations:
       required: false
 
-  - type: textarea
+  - type: input
     id: sub_projects
     attributes:
       label: Sub Projects
-      description: Additional project(s)/csproj path(s) to build. Add one per line for multiple.
-      placeholder: |
-        ADRAPI/ADRAPI/ADRAPI.csproj
+      description: Additional project(s)/csproj path(s) to build. Comma-separate multiple paths.
+      placeholder: e.g. ADRAPI/ADRAPI/ADRAPI.csproj
     validations:
       required: false
 
