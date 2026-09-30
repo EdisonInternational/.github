@@ -1,0 +1,88 @@
+name: Build Requirements (Python)
+description: Request a new build pipeline or report build requirements for a Python repository
+title: "[BUILD][PYTHON] "
+labels: ["build", "needs-triage", "agentic-workflow:build"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form to submit Python build requirements for a repository. This template is shared across the organization.
+
+        ### Technology
+        python
+
+  - type: input
+    id: target_repo
+    attributes:
+      label: Target Repo
+      description: The name of the repository the build is for.
+      placeholder: e.g. self-service-python-webapp
+    validations:
+      required: true
+
+  - type: input
+    id: target_branch
+    attributes:
+      label: Target Branch
+      description: Branch of the target repository to base the build on. Defaults to "main" if left blank.
+      placeholder: main
+    validations:
+      required: false
+
+  - type: input
+    id: project
+    attributes:
+      label: Project
+      description: The path of the project within the repository. Defaults to "." if left blank.
+      placeholder: "."
+    validations:
+      required: false
+
+  - type: input
+    id: component
+    attributes:
+      label: Component
+      description: The component being built.
+      placeholder: webapp
+    validations:
+      required: false
+
+  - type: textarea
+    id: target_env
+    attributes:
+      label: Target Env
+      description: The target environment(s) for this build. Add one per line to add multiple; paired by row with Asset Name below.
+      placeholder: |
+        qa
+        staging
+    validations:
+      required: false
+
+  - type: textarea
+    id: asset_name
+    attributes:
+      label: Asset Name
+      description: The asset name(s) to use for this build. Add one per line, matching the order of Target Env above.
+      placeholder: |
+        self-service-python-webapp-qa
+        self-service-python-webapp-st
+    validations:
+      required: false
+
+  - type: input
+    id: unit_test_path
+    attributes:
+      label: Unit Test Path
+      description: The path to the unit tests.
+      placeholder: tests
+    validations:
+      required: false
+
+  - type: input
+    id: python_version
+    attributes:
+      label: Python Version
+      description: The Python version to use.
+      placeholder: e.g. 3.12
+    validations:
+      required: false
