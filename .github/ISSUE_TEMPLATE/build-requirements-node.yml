@@ -105,6 +105,16 @@ body:
     validations:
       required: false
 
+  - type: dropdown
+    id: deployment_type
+    attributes:
+      label: Deployment Type
+      options:
+        - WebApp
+        - FunctionApp
+    validations:
+      required: false
+
   - type: input
     id: sonar_sources
     attributes:
