@@ -141,7 +141,7 @@ body:
         - FunctionApp
       default: 0
     validations:
-      required: false
+      required: true
 
   - type: input
     id: slot_name
