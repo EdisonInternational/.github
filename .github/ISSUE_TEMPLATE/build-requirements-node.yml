@@ -112,7 +112,7 @@ body:
       options:
         - WebApp
         - FunctionApp
-      default: WebApp
+      default: 0
     validations:
       required: false
 
