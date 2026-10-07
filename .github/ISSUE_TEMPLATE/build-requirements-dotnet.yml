@@ -143,6 +143,15 @@ body:
       required: false
 
   - type: input
+    id: slot_name
+    attributes:
+      label: Slot Name
+      description: The deployment slot name.
+      placeholder: e.g. staging
+    validations:
+      required: false
+
+  - type: input
     id: dotnet_project_name
     attributes:
       label: Project Name

@@ -116,6 +116,15 @@ body:
       required: false
 
   - type: input
+    id: slot_name
+    attributes:
+      label: Slot Name
+      description: The deployment slot name.
+      placeholder: e.g. staging
+    validations:
+      required: false
+
+  - type: input
     id: sonar_sources
     attributes:
       label: Sonar Sources
