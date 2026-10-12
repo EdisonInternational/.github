@@ -33,7 +33,7 @@ body:
     id: project
     attributes:
       label: Project
-      description: The path of the project within the repository. Defaults to "." if left blank.
+      description: Directory of the Python project within the repository (contains pyproject.toml, setup.py or requirements.txt). Defaults to "." if left blank.
       placeholder: "."
     validations:
       required: false
@@ -42,7 +42,7 @@ body:
     id: component
     attributes:
       label: Component
-      description: The component being built.
+      description: The component being built. Defaults to "functionapp" if left blank.
       placeholder: webapp
     validations:
       required: false
@@ -69,12 +69,34 @@ body:
     validations:
       required: false
 
-  - type: input
-    id: unit_test_path
+  - type: dropdown
+    id: deployment_type
     attributes:
-      label: Unit Test Path
-      description: The path to the unit tests.
-      placeholder: tests
+      label: Deployment Type
+      description: The type of Azure resource the build is deployed to.
+      options:
+        - FunctionApp
+        - WebApp
+    validations:
+      required: true
+
+  - type: dropdown
+    id: deployment_method
+    attributes:
+      label: Deployment Method
+      description: How the build is deployed. Only used for FunctionApp deployments.
+      options:
+        - default
+        - build-remote
+    validations:
+      required: false
+
+  - type: input
+    id: slot_name
+    attributes:
+      label: Slot Name
+      description: The deployment slot to deploy to. Leave blank for none.
+      placeholder: e.g. staging
     validations:
       required: false
 
@@ -82,7 +104,72 @@ body:
     id: python_version
     attributes:
       label: Python Version
-      description: The Python version to use.
+      description: The Python version to use. The build workflow has no default, so this should be set.
       placeholder: e.g. 3.12
+    validations:
+      required: false
+
+  - type: dropdown
+    id: package_mode
+    attributes:
+      label: Package Mode
+      description: How the application is packaged for deployment.
+      options:
+        - distributable
+        - source
+        - requirements
+    validations:
+      required: true
+
+  - type: input
+    id: pre_build
+    attributes:
+      label: Pre Build
+      description: Command to run before the build.
+      placeholder: e.g. pip install -r requirements-dev.txt
+    validations:
+      required: false
+
+  - type: input
+    id: post_build
+    attributes:
+      label: Post Build
+      description: Command to run after the build.
+      placeholder: e.g. python scripts/post_build.py
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: skip_unit_tests
+    attributes:
+      label: Skip Unit Tests
+      options:
+        - label: Skip unit tests in the Sonar check
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: quality_gate_check
+    attributes:
+      label: Quality Gate Check
+      options:
+        - label: Check the SonarQube Quality Gate status
+    validations:
+      required: false
+
+  - type: input
+    id: sonar_exclusions
+    attributes:
+      label: Sonar Exclusions
+      description: Comma-separated glob patterns to exclude from SonarQube analysis.
+      placeholder: e.g. tests/**,**/migrations/**
+    validations:
+      required: false
+
+  - type: input
+    id: sonar_project_name
+    attributes:
+      label: Sonar Project Name
+      description: Overrides the SonarQube project name.
     validations:
       required: false
