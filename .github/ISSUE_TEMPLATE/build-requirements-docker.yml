@@ -1,0 +1,177 @@
+name: Build Requirements (Docker)
+description: Request a new build/deploy pipeline for a Docker container repository
+title: "[BUILD][DOCKER] "
+labels: ["build", "needs-triage", "agentic-workflow:build", "Self-Service"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form to submit Docker build requirements for a repository. This template is shared across the organization.
+
+        ### Technology
+        docker
+
+  - type: input
+    id: target_repo
+    attributes:
+      label: Target Repo
+      description: The name of the repository the build is for.
+      placeholder: e.g. HelloWorld-Docker-Container
+    validations:
+      required: true
+
+  - type: input
+    id: target_branch
+    attributes:
+      label: Target Branch
+      description: Branch of the target repository to base the build on. Defaults to "main" if left blank.
+      placeholder: main
+    validations:
+      required: false
+
+  - type: input
+    id: project
+    attributes:
+      label: Project
+      description: Directory containing the Dockerfile context within the repository. Defaults to "." if left blank.
+      placeholder: "."
+    validations:
+      required: false
+
+  - type: input
+    id: dockerfile
+    attributes:
+      label: Dockerfile
+      description: Path to the Dockerfile. Defaults to "./Dockerfile" if left blank.
+      placeholder: ./Dockerfile
+    validations:
+      required: false
+
+  - type: input
+    id: component
+    attributes:
+      label: Component
+      description: The component being built. Defaults to empty (no component) if left blank.
+      placeholder: e.g. api
+    validations:
+      required: false
+
+  - type: input
+    id: asset_name
+    attributes:
+      label: Asset Name
+      description: The name of the image tarball produced by the build.
+      placeholder: e.g. helloworld-docker.tar
+    validations:
+      required: true
+
+  - type: input
+    id: registry_host
+    attributes:
+      label: Registry Host
+      description: Hostname of the container registry the image is pushed to.
+      placeholder: e.g. scempacrsdop001.azurecr.io
+    validations:
+      required: true
+
+  - type: input
+    id: image_name
+    attributes:
+      label: Image Name
+      description: Name of the image within the registry, including any namespace.
+      placeholder: e.g. edisoninternational/helloworld-docker-container
+    validations:
+      required: true
+
+  - type: input
+    id: target_env
+    attributes:
+      label: Target Env
+      description: The single non-prod environment to deploy to.
+      placeholder: e.g. develop
+    validations:
+      required: true
+
+  - type: input
+    id: kubernetes_manifests
+    attributes:
+      label: Kubernetes Manifests
+      description: Semicolon-separated paths to the Kubernetes manifests to deploy.
+      placeholder: e.g. k8s/deployment.yaml;k8s/service.yaml
+    validations:
+      required: true
+
+  - type: input
+    id: image_placeholder
+    attributes:
+      label: Image Placeholder
+      description: The string in the manifests that is replaced with the built image URL.
+      placeholder: e.g. IMAGE_PLACEHOLDER
+    validations:
+      required: true
+
+  - type: input
+    id: deploy_runner
+    attributes:
+      label: Deploy Runner
+      description: The runner label used for the deploy job.
+      placeholder: e.g. linux-8.10-sce-gcp
+    validations:
+      required: true
+
+  - type: input
+    id: build_runner
+    attributes:
+      label: Build Runner
+      description: The runner label used for the build job. Defaults to "ubuntu-latest" if left blank.
+      placeholder: ubuntu-latest
+    validations:
+      required: false
+
+  - type: input
+    id: gke_cluster
+    attributes:
+      label: GKE Cluster
+      description: Name of the GKE cluster to deploy to. Defaults to empty (not set) if left blank.
+      placeholder: e.g. my-gke-cluster
+    validations:
+      required: false
+
+  - type: input
+    id: gcp_region
+    attributes:
+      label: GCP Region
+      description: GCP region of the GKE cluster. Defaults to empty (not set) if left blank.
+      placeholder: e.g. us-central1
+    validations:
+      required: false
+
+  - type: textarea
+    id: sed_substitutions
+    attributes:
+      label: Manifest Substitutions
+      description: Substitutions applied to the manifests before deploy. One FROM|TO pair per line. Defaults to none if left blank.
+      placeholder: |
+        FROM_VALUE|TO_VALUE
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: scan_container
+    attributes:
+      label: Scan Container
+      description: Defaults to unchecked (no scan).
+      options:
+        - label: Scan the built container image with Trivy
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: quality_gate_check
+    attributes:
+      label: Dockerfile Check (PR)
+      description: Defaults to unchecked (non-strict).
+      options:
+        - label: Fail PRs on Dockerfile scan violations (strict mode)
+    validations:
+      required: false
