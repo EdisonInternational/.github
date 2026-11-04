@@ -1,0 +1,171 @@
+name: Build Requirements (iOS)
+description: Request a new build/deploy pipeline for a native iOS (Xcode) repository
+title: "[BUILD][IOS] "
+labels: ["build", "needs-triage", "agentic-workflow:build", "Self-Service"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form to submit iOS build requirements for a repository. This template is shared across the organization.
+
+        ### Technology
+        ios
+
+  - type: input
+    id: target_repo
+    attributes:
+      label: Target Repo
+      description: The name of the repository the build is for.
+      placeholder: e.g. HelloWorld-iOS
+    validations:
+      required: true
+
+  - type: input
+    id: target_branch
+    attributes:
+      label: Target Branch
+      description: Branch of the target repository to base the build on. Defaults to "main" if left blank.
+      placeholder: main
+    validations:
+      required: false
+
+  - type: input
+    id: project
+    attributes:
+      label: Project
+      description: Directory containing the .xcodeproj within the repository. Auto-detected if left blank.
+      placeholder: e.g. HelloWorldIOS
+    validations:
+      required: false
+
+  - type: input
+    id: xcode_project
+    attributes:
+      label: Xcode Project
+      description: Xcode project name without the ".xcodeproj" suffix, used for the SonarQube check. Auto-detected if left blank.
+      placeholder: e.g. HelloWorldIOS
+    validations:
+      required: false
+
+  - type: input
+    id: scheme
+    attributes:
+      label: Scheme
+      description: The xcodebuild scheme name.
+      placeholder: e.g. HelloWorldIOS
+    validations:
+      required: true
+
+  - type: input
+    id: target_env
+    attributes:
+      label: Target Env
+      description: The non-prod environment used for builds and TestFlight deploys. Defaults to "develop" if left blank.
+      placeholder: develop
+    validations:
+      required: false
+
+  - type: input
+    id: xcode_version
+    attributes:
+      label: Xcode Version
+      description: Xcode version to build with. Defaults to the latest available on the runner if left blank.
+      placeholder: e.g. 16.4
+    validations:
+      required: false
+
+  - type: input
+    id: runner_version
+    attributes:
+      label: Runner Version
+      description: macOS runner version. Defaults to the shared workflow default if left blank.
+      placeholder: e.g. macos-15
+    validations:
+      required: false
+
+  - type: input
+    id: envfile
+    attributes:
+      label: Env File
+      description: Environment file copied into the workspace before the build. Leave blank for none.
+      placeholder: e.g. config/.env.develop
+    validations:
+      required: false
+
+  - type: input
+    id: sonar_exclusions
+    attributes:
+      label: Sonar Exclusions
+      description: Additional files or directories to exclude from SonarQube analysis (comma-separated). Leave blank for none.
+      placeholder: e.g. **/Pods/**,**/Generated/**
+    validations:
+      required: false
+
+  - type: input
+    id: ui_test_target
+    attributes:
+      label: UI Test Target
+      description: XCUITest target to run after deploy. Leave blank to skip UI tests.
+      placeholder: e.g. HelloWorldIOSUITests
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: auto_manage_signing
+    attributes:
+      label: Auto Manage Signing
+      description: Leaving this unticked keeps the default behavior.
+      options:
+        - label: Let the build automatically manage code signing
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: skip_unit_tests
+    attributes:
+      label: Skip Unit Tests
+      description: Leaving this unticked keeps the default behavior.
+      options:
+        - label: Skip unit tests in the SonarQube check (use when tests need resources that are unavailable)
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: quality_gate_check
+    attributes:
+      label: Fail PRs on Quality Gate
+      description: Leaving this unticked keeps the default behavior.
+      options:
+        - label: Fail pull requests when the SonarQube quality gate fails (strict mode)
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: skip_nexus_upload
+    attributes:
+      label: Skip Nexus Upload
+      description: Leaving this unticked keeps the default behavior.
+      options:
+        - label: Do not upload release builds to Nexus
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: skip_testflight_deploy
+    attributes:
+      label: Skip TestFlight Deploy
+      description: Leaving this unticked keeps the default behavior.
+      options:
+        - label: Do not deploy builds to TestFlight in the build-deploy-test workflow
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: skip_strict_security
+    attributes:
+      label: Skip Strict Security Check
+      description: Leaving this unticked keeps the default behavior.
+      options:
+        - label: Do not fail builds on critical security findings
+    validations:
+      required: false
