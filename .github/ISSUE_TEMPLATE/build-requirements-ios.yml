@@ -131,41 +131,11 @@ body:
       required: false
 
   - type: checkboxes
-    id: quality_gate_check
-    attributes:
-      label: Fail PRs on Quality Gate
-      description: Leaving this unticked keeps the default behavior.
-      options:
-        - label: Fail pull requests when the SonarQube quality gate fails (strict mode)
-    validations:
-      required: false
-
-  - type: checkboxes
-    id: skip_nexus_upload
-    attributes:
-      label: Skip Nexus Upload
-      description: Leaving this unticked keeps the default behavior.
-      options:
-        - label: Do not upload release builds to Nexus
-    validations:
-      required: false
-
-  - type: checkboxes
     id: skip_testflight_deploy
     attributes:
       label: Skip TestFlight Deploy
       description: Leaving this unticked keeps the default behavior.
       options:
         - label: Do not deploy builds to TestFlight in the build-deploy-test workflow
-    validations:
-      required: false
-
-  - type: checkboxes
-    id: skip_strict_security
-    attributes:
-      label: Skip Strict Security Check
-      description: Leaving this unticked keeps the default behavior.
-      options:
-        - label: Do not fail builds on critical security findings
     validations:
       required: false
