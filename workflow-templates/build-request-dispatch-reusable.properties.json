@@ -1,6 +1,6 @@
 {
     "name": "Self Service",
-    "description": "Build template for .Net, Java, iOS, Bicep, React Native",
+    "description": "Self-service build request dispatch for Node, .NET, Python, Docker and iOS",
     "iconName": "SCE_Favicon",
     "categories": [
         "utilities"

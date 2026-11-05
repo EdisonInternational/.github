@@ -1,21 +1,38 @@
 ---
 #
-# Build Request Dispatch (Reusable Workflow Call)
+# Build Request Dispatch - All Technologies (Reusable Workflow Call)
 #
-# Alternative to build-request-dispatch.yml that avoids the REST API
-# dispatch-and-poll pattern. Instead, this calls
-# generate-caller-workflow-master-reusable.yml in EdisonInternational/agents
-# directly as a reusable workflow (`uses:`), letting GitHub Actions itself
-# wait for completion.
+# Single dispatch workflow for the Node, .NET, Python, Docker and iOS
+# "Build Requirements" issue forms in EdisonInternational/.github. It runs when
+# an issue has the "Self-Service" label and its title starts with
+# "[BUILD][NODE]", "[BUILD][DOTNET]", "[BUILD][PYTHON]", "[BUILD][DOCKER]" or
+# "[BUILD][IOS]"; the technology is taken from that title prefix.
 #
-# No PAT is needed: target_repo is always this repo (the caller), and a
-# reusable workflow's GITHUB_TOKEN is scoped to the caller, not to the repo
-# where the called workflow's YAML lives. This requires
-# generate-caller-workflow-master-reusable.yml to use GITHUB_TOKEN (not
-# WORKFLOW_PAT) for its checkout/PR steps.
+# Issue-form fields are parsed from "### <Label>" headings in the issue body
+# and mapped to the `payload` JSON the reusable workflow expects. The reusable
+# workflow takes 4 inputs: technology, target_repo, target_branch and payload
+# (a JSON object of flat string/boolean values).
 #
-# The ref is pinned to `main` because reusable workflow refs in `uses:`
-# must be static and cannot come from a variable/expression.
+# Flow: parse-issue -> create-helix-request -> trigger-devops-ci-builder ->
+# commit-generated-workflows.
+#
+# generate-caller-workflow-master-reusable.yml only generates the caller
+# workflow YAML and uploads it as the "generated-yaml" artifact; it does not
+# touch this repo. The commit-generated-workflows job downloads that artifact
+# and commits the files into .github/workflows on a feature branch.
+# target_repo must be this repo (the caller); parse-issue fails otherwise.
+#
+# Required configuration (repository or organization level):
+#   secrets.GH_AW_GITHUB_TOKEN            Token for the agents reusable workflow
+#   secrets.HELIX_PASSWORD                Helix ITSM password
+#   vars.HELIX_USERNAME                   Helix ITSM username
+#   secrets.SELF_SERVICE_APP_ID           Self-service GitHub App ID
+#   secrets.SELF_SERVICE_APP_PRIVATE_KEY  Self-service GitHub App private key
+#   Generated workflows only:
+#     docker: vars.AZURE_ACR_REGISTRY_NAME, secrets.ACR_PASSWORD,
+#             secrets.GCP_SERVICE_ACCOUNT_KEY
+#     ios:    secrets.APPLE_USERNAME, secrets.APPLE_PASSWORD, plus the signing,
+#             SonarQube and Nexus secrets
 #
 name: Build Request Dispatch (Reusable Workflow)
 
@@ -28,142 +45,291 @@ permissions:
   contents: write
   pull-requests: write
   actions: read
+  copilot-requests: write
 
 jobs:
   parse-issue:
-    if: contains(github.event.issue.labels.*.name, 'Self-Service')
+    if: >-
+      contains(github.event.issue.labels.*.name, 'Self-Service') && (
+        startsWith(github.event.issue.title, '[BUILD][NODE]') ||
+        startsWith(github.event.issue.title, '[BUILD][DOTNET]') ||
+        startsWith(github.event.issue.title, '[BUILD][PYTHON]') ||
+        startsWith(github.event.issue.title, '[BUILD][DOCKER]') ||
+        startsWith(github.event.issue.title, '[BUILD][IOS]')
+      )
     runs-on: ubuntu-latest
     outputs:
       technology: ${{ steps.parse.outputs.technology }}
       target_repo: ${{ steps.parse.outputs.target_repo }}
       target_branch: ${{ steps.parse.outputs.target_branch }}
-      project: ${{ steps.parse.outputs.project }}
-      component: ${{ steps.parse.outputs.component }}
-      unit_test_path: ${{ steps.parse.outputs.unit_test_path }}
-      app_type: ${{ steps.parse.outputs.app_type }}
-      node_version: ${{ steps.parse.outputs.node_version }}
-      legacy_peer_deps: ${{ steps.parse.outputs.legacy_peer_deps }}
-      additional_input: ${{ steps.parse.outputs.additional_input }}
-      sonar_sources: ${{ steps.parse.outputs.sonar_sources }}
-      test_command: ${{ steps.parse.outputs.test_command }}
-      quality_gate_check: ${{ steps.parse.outputs.quality_gate_check }}
-      coverage_exclusions: ${{ steps.parse.outputs.coverage_exclusions }}
-      dotnet_project_name: ${{ steps.parse.outputs.dotnet_project_name }}
-      sub_projects: ${{ steps.parse.outputs.sub_projects }}
-      dotnet_version: ${{ steps.parse.outputs.dotnet_version }}
-      build_additional_args: ${{ steps.parse.outputs.build_additional_args }}
-      publish_command: ${{ steps.parse.outputs.publish_command }}
-      publish: ${{ steps.parse.outputs.publish }}
-      obj_dir_fallback: ${{ steps.parse.outputs.obj_dir_fallback }}
+      payload: ${{ steps.parse.outputs.payload }}
     steps:
-      - name: Parse issue form fields
+      - name: Parse build requirements issue form
         id: parse
         uses: actions/github-script@v7
         with:
           script: |
             const body = context.payload.issue.body || '';
+            const title = context.payload.issue.title || '';
+
+            // Capture everything under a "### <Label>" heading up to the next
+            // heading (or end of body) so multi-line textarea fields survive.
             function extractField(label) {
-              const regex = new RegExp(`### ${label}\\s*\\n+([^\\n]+)`);
+              // Labels such as ".NET Version" contain regex metacharacters.
+              const escaped = label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+              const regex = new RegExp(`###\\s+${escaped}\\s*\\n+([\\s\\S]*?)(?=\\n###\\s|$)`);
               const match = body.match(regex);
               const value = match ? match[1].trim() : '';
-              return (!value || value === '_No response_') ? '' : value;
-            }
-            function extractCheckbox(label) {
-              return /\[x\]/i.test(extractField(label));
-            }
-            function extractMultilineField(label) {
-              const regex = new RegExp(`### ${label}\\s*\\n+([\\s\\S]*?)(?=\\n### |$)`);
-              const match = body.match(regex);
-              const value = match ? match[1].trim() : '';
-              return (!value || value === '_No response_') ? '' : value;
+              // Issue forms render an unselected optional dropdown as "None".
+              return value === '_No response_' || value === 'None' ? '' : value;
             }
 
-            const technology = extractField('Technology');
-            const targetRepoRaw = extractField('Target Repo');
-            const targetBranch = extractField('Target Branch');
-            const project = extractField('Project');
-            const component = extractField('Component');
-            const unitTestPath = extractField('Unit Test Path');
-            const appType = extractField('App Type');
-            const nodeVersion = extractField('Node Version');
-            const legacyPeerDeps = extractCheckbox('Legacy Peer Deps');
-            // one entry per line; rows are paired by index (line 1 of Target Env with line 1 of Asset Name, etc.)
-            const targetEnvs = extractMultilineField('Target Env').split('\n').map(line => line.trim()).filter(Boolean);
-            const assetNames = extractMultilineField('Asset Name').split('\n').map(line => line.trim()).filter(Boolean);
-            const pairCount = Math.max(targetEnvs.length, assetNames.length);
-            const additionalInput = Array.from({ length: pairCount }, (_, i) => {
-              const pair = [
-                targetEnvs[i] && `target_env: ${targetEnvs[i]}`,
-                assetNames[i] && `asset_name: ${assetNames[i]}`,
-              ].filter(Boolean).join(', ');
-              return pair;
-            }).filter(Boolean).join('; ');
-            const sonarSources = extractField('Sonar Sources');
-            const testCommand = extractField('Test Command');
-            const qualityGateCheck = extractCheckbox('Quality Gate Check');
-            const coverageExclusions = extractField('Coverage Exclusions');
-            const dotnetProjectName = extractField('Project Name');
-            const subProjects = extractField('Sub Projects');
-            const dotnetVersion = extractField('.NET Version');
-            const buildAdditionalArgs = extractField('Build Additional Args');
-            const publishCommand = extractField('Publish Command');
-            const publish = extractCheckbox('Publish');
-            const objDirFallback = extractCheckbox('Obj Dir Fallback');
-
-            if (!technology) {
-              core.setFailed(`Unsupported or missing Technology: "${technology}"`);
-              return;
+            // Checkbox fields render as "- [x] <option>" when ticked.
+            function isChecked(label) {
+              return /- \[[xX]\]/.test(extractField(label));
             }
-            if (!targetRepoRaw) {
-              core.setFailed('Target Repo is required');
-              return;
-            }
-            // basename strips any "org/" prefix so only the repo name is sent
-            const target_repo = targetRepoRaw.split('/').pop();
 
-            core.setOutput('technology', technology);
-            core.setOutput('target_repo', target_repo);
-            core.setOutput('target_branch', targetBranch || 'main');
-            core.setOutput('project', project || '.');
-            core.setOutput('component', component);
-            core.setOutput('unit_test_path', unitTestPath);
-            core.setOutput('app_type', appType);
-            core.setOutput('node_version', nodeVersion);
-            core.setOutput('legacy_peer_deps', legacyPeerDeps);
-            core.setOutput('additional_input', additionalInput);
-            core.setOutput('sonar_sources', sonarSources);
-            core.setOutput('test_command', testCommand);
-            core.setOutput('quality_gate_check', qualityGateCheck);
-            core.setOutput('coverage_exclusions', coverageExclusions);
-            core.setOutput('dotnet_project_name', dotnetProjectName);
-            core.setOutput('sub_projects', subProjects);
-            core.setOutput('dotnet_version', dotnetVersion);
-            core.setOutput('build_additional_args', buildAdditionalArgs);
-            core.setOutput('publish_command', publishCommand);
-            core.setOutput('publish', publish);
-            core.setOutput('obj_dir_fallback', objDirFallback);
-  trigger-devops-ci-builder:
+            function extractRows(label) {
+              return extractField(label).split('\n').map(s => s.trim()).filter(Boolean);
+            }
+
+            // Pairs each Target Env row with the Asset Name on the same row.
+            function envAssetPairs(keepEmptyAssets) {
+              const envs = extractRows('Target Env');
+              const assets = extractRows('Asset Name');
+              const pairs = envs
+                .map((env, i) => (assets[i] || keepEmptyAssets
+                  ? `target_env: ${env}, asset_name: ${assets[i] || ''}`
+                  : ''))
+                .filter(Boolean);
+              return { envs, pairs };
+            }
+
+            // The agents repo rejects unknown keys, nested values and non-boolean
+            // booleans. Empty strings mean "not passed" and fall back to the
+            // reusable workflow's defaults.
+            const builders = {
+              node() {
+                const { envs, pairs } = envAssetPairs(true);
+                return {
+                  project: extractField('Project') || '.',
+                  component: extractField('Component'),
+                  unit_test_path: extractField('Unit Test Path'),
+                  additional_input: envs.length
+                    ? `${pairs.join(', ')}. BUILD_ENV: ${envs.join(',')}`
+                    : '',
+                  deployment_type: extractField('Deployment Type'),
+                  slot_name: extractField('Slot Name'),
+                  app_type: extractField('App Type'),
+                  node_version: extractField('Node Version'),
+                  sonar_sources: extractField('Sonar Sources'),
+                  test_command: extractField('Test Command'),
+                  coverage_exclusions: extractField('Coverage Exclusions'),
+                  legacy_peer_deps: isChecked('Legacy Peer Deps'),
+                  quality_gate_check: isChecked('Quality Gate Check'),
+                };
+              },
+              dotnet() {
+                const { envs, pairs } = envAssetPairs(true);
+                return {
+                  project: extractField('Project') || '.',
+                  component: extractField('Component'),
+                  unit_test_path: extractField('Unit Test Path'),
+                  additional_input: envs.length ? `${pairs.join(', ')}.` : '',
+                  deployment_type: extractField('Deployment Type'),
+                  slot_name: extractField('Slot Name'),
+                  sub_projects: extractField('Sub Projects'),
+                  dotnet_version: extractField('.NET Version'),
+                  build_additional_args: extractField('Build Additional Args'),
+                  publish_command: extractField('Publish Command'),
+                  publish: isChecked('Publish'),
+                  obj_dir_fallback: isChecked('Obj Dir Fallback'),
+                };
+              },
+              python() {
+                // Rows without both values are dropped so the agent never sees an empty asset.
+                const { envs, pairs } = envAssetPairs(false);
+                return {
+                  project: extractField('Project') || '.',
+                  component: extractField('Component'),
+                  target_env: envs[0] || '',
+                  additional_input: pairs.length ? `${pairs.join(', ')}.` : '',
+                  deployment_type: extractField('Deployment Type'),
+                  deployment_method: extractField('Deployment Method'),
+                  slot_name: extractField('Slot Name'),
+                  python_version: extractField('Python Version'),
+                  package_mode: extractField('Package Mode'),
+                  pre_build: extractField('Pre Build'),
+                  post_build: extractField('Post Build'),
+                  // Only sent when ticked so an unticked box does not emit SKIP_UNIT_TESTS: false.
+                  skip_unit_tests: isChecked('Skip Unit Tests') ? true : '',
+                  quality_gate_check: isChecked('Quality Gate Check'),
+                  sonar_exclusions: extractField('Sonar Exclusions'),
+                  sonar_project_name: extractField('Sonar Project Name'),
+                };
+              },
+              docker() {
+                const payload = {
+                  project: extractField('Project') || '.',
+                  dockerfile: extractField('Dockerfile'),
+                  component: extractField('Component'),
+                  asset_name: extractField('Asset Name'),
+                  registry_host: extractField('Registry Host'),
+                  image_name: extractField('Image Name'),
+                  target_env: extractField('Target Env'),
+                  kubernetes_manifests: extractField('Kubernetes Manifests'),
+                  image_placeholder: extractField('Image Placeholder'),
+                  deploy_runner: extractField('Deploy Runner'),
+                  runner: extractField('Build Runner'),
+                  gke_cluster: extractField('GKE Cluster'),
+                  gcp_region: extractField('GCP Region'),
+                  sed_substitutions: extractField('Manifest Substitutions'),
+                  scan_container: isChecked('Scan Container'),
+                  quality_gate_check: isChecked('Dockerfile Check (PR)'),
+                };
+                const required = [
+                  'asset_name',
+                  'registry_host',
+                  'image_name',
+                  'target_env',
+                  'kubernetes_manifests',
+                  'image_placeholder',
+                  'deploy_runner',
+                ];
+                const missing = required.filter(key => !payload[key]);
+                if (missing.length) {
+                  throw new Error(`Missing required field(s): ${missing.join(', ')}`);
+                }
+                return payload;
+              },
+              ios() {
+                // The "Skip ..." checkboxes are inverted so leaving them unticked keeps the default (enabled).
+                const payload = {
+                  project: extractField('Project'),
+                  xcode_project: extractField('Xcode Project'),
+                  scheme: extractField('Scheme'),
+                  target_env: extractField('Target Env'),
+                  runner: extractField('Build Runner'),
+                  xcode_version: extractField('Xcode Version'),
+                  runner_version: extractField('Runner Version'),
+                  envfile: extractField('Env File'),
+                  sonar_exclusions: extractField('Sonar Exclusions'),
+                  ui_test_target: extractField('UI Test Target'),
+                  auto_manage_signing: isChecked('Auto Manage Signing'),
+                  skip_unit_tests: isChecked('Skip Unit Tests'),
+                  quality_gate_check: isChecked('Fail PRs on Quality Gate'),
+                  include_nexus_upload: !isChecked('Skip Nexus Upload'),
+                  deploy_testflight: !isChecked('Skip TestFlight Deploy'),
+                  strict_security: !isChecked('Skip Strict Security Check'),
+                };
+                if (!payload.scheme) {
+                  throw new Error('Missing required field(s): scheme');
+                }
+                return payload;
+              },
+            };
+
+            try {
+              const prefix = title.match(/^\[BUILD\]\[(NODE|DOTNET|PYTHON|DOCKER|IOS)\]/i);
+              if (!prefix) {
+                throw new Error(`Unsupported issue title: "${title}"`);
+              }
+              const technology = prefix[1].toLowerCase();
+
+              const repositoryName = extractField('Target Repo');
+              if (!repositoryName) {
+                throw new Error('Target Repo is required');
+              }
+
+              // Prevent an issue from generating workflows for another repository.
+              const targetRepo = repositoryName.split('/').pop();
+              if (targetRepo !== context.payload.repository.name) {
+                throw new Error(
+                  `Target Repo '${targetRepo}' does not match this repository '${context.payload.repository.name}'`
+                );
+              }
+
+              const payload = builders[technology]();
+
+              core.setOutput('technology', technology);
+              core.setOutput('target_repo', targetRepo);
+              core.setOutput('target_branch', extractField('Target Branch') || 'main');
+              core.setOutput('payload', JSON.stringify(payload));
+            } catch (error) {
+              core.setFailed(error.message);
+            }
+
+  create-helix-request:
     needs: parse-issue
-    uses: EdisonInternational/agents/.github/workflows/generate-caller-workflow-master-reusable.yml@reusable-caller-workflow
+    uses: EdisonInternational/actions/.github/workflows/create-helix-request.yml@main
+    with:
+      ITSM_ENVIRONMENT: 'uat'
+      # toJSON() quotes and escapes the free-text COMPONENT value.
+      PAYLOAD: |
+        {
+          "values": {
+            "TECHNOLOGY": ${{ toJSON(needs.parse-issue.outputs.technology) }},
+            "COMPONENT": ${{ toJSON(format('This request has been submitted by github user "{0}" for DevOps self service portal for Technology "{1}". Refer to this for the github run "{2}/{3}/actions/runs/{4}"', github.event.issue.user.login, needs.parse-issue.outputs.technology, github.server_url, github.repository, github.run_id)) }}
+          }
+        }
+    secrets:
+      HELIX_PASSWORD: ${{ secrets.HELIX_PASSWORD }}
+
+  trigger-devops-ci-builder:
+    needs: [parse-issue, create-helix-request]
+    uses: EdisonInternational/agents/.github/workflows/generate-caller-workflow-master-reusable.yml@main
     with:
       technology: ${{ needs.parse-issue.outputs.technology }}
       target_repo: ${{ needs.parse-issue.outputs.target_repo }}
       target_branch: ${{ needs.parse-issue.outputs.target_branch }}
-      project: ${{ needs.parse-issue.outputs.project }}
-      component: ${{ needs.parse-issue.outputs.component }}
-      unit_test_path: ${{ needs.parse-issue.outputs.unit_test_path }}
-      app_type: ${{ needs.parse-issue.outputs.app_type }}
-      node_version: ${{ needs.parse-issue.outputs.node_version }}
-      legacy_peer_deps: ${{ needs.parse-issue.outputs.legacy_peer_deps == 'true' }}
-      additional_input: ${{ needs.parse-issue.outputs.additional_input }}
-      sonar_sources: ${{ needs.parse-issue.outputs.sonar_sources }}
-      test_command: ${{ needs.parse-issue.outputs.test_command }}
-      quality_gate_check: ${{ needs.parse-issue.outputs.quality_gate_check == 'true' }}
-      coverage_exclusions: ${{ needs.parse-issue.outputs.coverage_exclusions }}
-      dotnet_project_name: ${{ needs.parse-issue.outputs.dotnet_project_name }}
-      sub_projects: ${{ needs.parse-issue.outputs.sub_projects }}
-      dotnet_version: ${{ needs.parse-issue.outputs.dotnet_version }}
-      build_additional_args: ${{ needs.parse-issue.outputs.build_additional_args }}
-      publish_command: ${{ needs.parse-issue.outputs.publish_command }}
-      publish: ${{ needs.parse-issue.outputs.publish == 'true' }}
-      obj_dir_fallback: ${{ needs.parse-issue.outputs.obj_dir_fallback == 'true' }}
+      payload: ${{ needs.parse-issue.outputs.payload }}
+    secrets:
+      GH_AW_GITHUB_TOKEN: ${{ secrets.GH_AW_GITHUB_TOKEN }}
+
+  commit-generated-workflows:
+    needs: [parse-issue, trigger-devops-ci-builder]
+    runs-on: ubuntu-latest
+    steps:
+      # Mint a short-lived installation token from the org GitHub App. The
+      # App has Workflows: write, so unlike GITHUB_TOKEN it can push files
+      # under .github/workflows. Installed org-wide, so no per-repo secrets.
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.SELF_SERVICE_APP_ID }}
+          private-key: ${{ secrets.SELF_SERVICE_APP_PRIVATE_KEY }}
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.parse-issue.outputs.target_branch }}
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Download generated workflow artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: generated-yaml
+          path: .github/workflows
+
+      - name: Create branch and commit generated workflows
+        env:
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          set -euo pipefail
+
+          branch="feature/self-service-${ISSUE_NUMBER}"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git checkout -b "$branch"
+          git add .github/workflows
+
+          if git diff --cached --quiet; then
+            echo "::error::No workflow files were generated by the DevOps CI Builder"
+            exit 1
+          fi
+
+          git commit -m "Add self-service CI workflows (issue #${ISSUE_NUMBER})"
+          git push origin "$branch"
