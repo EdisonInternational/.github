@@ -13,8 +13,8 @@
 # workflow takes 4 inputs: technology, target_repo, target_branch and payload
 # (a JSON object of flat string/boolean values).
 #
-# Flow: parse-issue -> create-helix-request -> trigger-devops-ci-builder ->
-# commit-generated-workflows.
+# Flow: parse-issue -> prepare-helix-values -> create-helix-request ->
+# trigger-devops-ci-builder -> commit-generated-workflows.
 #
 # generate-caller-workflow-master-reusable.yml only generates the caller
 # workflow YAML and uploads it as the "generated-yaml" artifact; it does not
@@ -259,19 +259,43 @@ jobs:
               core.setFailed(error.message);
             }
 
-  create-helix-request:
+  # Maps the issue to Helix field names; create-helix-request sends
+  # REQUEST_FIELDS unchanged. jq --arg keeps the free-text values JSON-safe.
+  prepare-helix-values:
     needs: parse-issue
+    runs-on: ubuntu-latest
+    outputs:
+      request_fields: ${{ steps.build.outputs.request_fields }}
+    steps:
+      - id: build
+        env:
+          TECHNOLOGY: ${{ needs.parse-issue.outputs.technology }}
+          COMPONENT: >-
+            ${{ format('Submitted by GitHub user "{0}" for technology "{1}". Run: {2}/{3}/actions/runs/{4}', github.event.issue.user.login, needs.parse-issue.outputs.technology, github.server_url, github.repository, github.run_id) }}
+          TARGET_REPO: ${{ github.event.repository.name }}
+          SOURCE_KEYWORD: 'Devops Self-Service Portal - API'
+        run: |
+          set -euo pipefail
+          request_fields=$(jq -cn \
+            --arg technology "$TECHNOLOGY" \
+            --arg component "$COMPONENT" \
+            --arg target_repo "$TARGET_REPO" \
+            --arg source_keyword "$SOURCE_KEYWORD" \
+            '{
+              "SR Type Field 10": $technology,
+              "SR Type Field 11": $target_repo,
+              "SR Type Field 12": $component,
+              "Source Keyword": $source_keyword
+            }')
+          printf 'request_fields=%s\n' "$request_fields" >> "$GITHUB_OUTPUT"
+
+  create-helix-request:
+    needs: [parse-issue, prepare-helix-values]
     uses: EdisonInternational/actions/.github/workflows/create-helix-request.yml@main
     with:
-      ITSM_ENVIRONMENT: 'uat'
-      # toJSON() quotes and escapes the free-text COMPONENT value.
-      PAYLOAD: |
-        {
-          "values": {
-            "TECHNOLOGY": ${{ toJSON(needs.parse-issue.outputs.technology) }},
-            "COMPONENT": ${{ toJSON(format('This request has been submitted by github user "{0}" for DevOps self service portal for Technology "{1}". Refer to this for the github run "{2}/{3}/actions/runs/{4}"', github.event.issue.user.login, needs.parse-issue.outputs.technology, github.server_url, github.repository, github.run_id)) }}
-          }
-        }
+      ITSM_ENVIRONMENT: uat
+      # SERVICE_REQUEST_DEFINITION_ID: ${{ vars.TITLE_INSTANCE_ID }}
+      REQUEST_FIELDS: ${{ needs.prepare-helix-values.outputs.request_fields }}
     secrets:
       HELIX_PASSWORD: ${{ secrets.HELIX_PASSWORD }}
 
