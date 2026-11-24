@@ -10,8 +10,9 @@
 #
 # Issue-form fields are parsed from "### <Label>" headings in the issue body
 # and mapped to the `payload` JSON the reusable workflow expects. The reusable
-# workflow takes 4 inputs: technology, target_repo, target_branch and payload
-# (a JSON object of flat string/boolean values).
+# workflow takes 3 required inputs: technology, target_branch and payload
+# (a JSON object of flat string/boolean values). target_repo is optional and
+# defaults to the calling repository (github.repository).
 #
 # Flow: parse-issue -> prepare-helix-values -> create-helix-request ->
 # trigger-devops-ci-builder -> commit-generated-workflows.
@@ -20,7 +21,7 @@
 # workflow YAML and uploads it as the "generated-yaml" artifact; it does not
 # touch this repo. The commit-generated-workflows job downloads that artifact
 # and commits the files into .github/workflows on a feature branch.
-# target_repo must be this repo (the caller); parse-issue fails otherwise.
+# The target is always the repository the issue was opened in.
 #
 # Required configuration (repository or organization level):
 #   secrets.GH_AW_GITHUB_TOKEN            Token for the agents reusable workflow
@@ -236,17 +237,12 @@ jobs:
               }
               const technology = prefix[1].toLowerCase();
 
-              const repositoryName = extractField('Target Repo');
-              if (!repositoryName) {
-                throw new Error('Target Repo is required');
-              }
-
-              // Prevent an issue from generating workflows for another repository.
-              const targetRepo = repositoryName.split('/').pop();
-              if (targetRepo !== context.payload.repository.name) {
-                throw new Error(
-                  `Target Repo '${targetRepo}' does not match this repository '${context.payload.repository.name}'`
-                );
+              // The target is always the repository the issue was opened in. Older forms
+              // still carry a "Target Repo" field; if present it must match.
+              const targetRepo = context.payload.repository.name;
+              const legacyRepo = extractField('Target Repo').split('/').pop();
+              if (legacyRepo && legacyRepo !== targetRepo) {
+                throw new Error(`Target Repo '${legacyRepo}' does not match this repository '${targetRepo}'`);
               }
 
               const payload = builders[technology]();
@@ -304,7 +300,6 @@ jobs:
     uses: EdisonInternational/agents/.github/workflows/generate-caller-workflow-master-reusable.yml@main
     with:
       technology: ${{ needs.parse-issue.outputs.technology }}
-      target_repo: ${{ needs.parse-issue.outputs.target_repo }}
       target_branch: ${{ needs.parse-issue.outputs.target_branch }}
       payload: ${{ needs.parse-issue.outputs.payload }}
     secrets:
