@@ -116,9 +116,9 @@ jobs:
                   project: extractField('Project') || '.',
                   component: extractField('Component'),
                   unit_test_path: extractField('Unit Test Path'),
-                  additional_input: envs.length
-                    ? `${pairs.join(', ')}. BUILD_ENV: ${envs.join(',')}`
-                    : '',
+                  additional_input: envs.length ? `${pairs.join(', ')}.` : '',
+                  build_env: extractRows('Build Env').join(','),
+                  release_build_env: extractField('Release Build Env'),
                   deployment_type: extractField('Deployment Type'),
                   slot_name: extractField('Slot Name'),
                   app_type: extractField('App Type'),

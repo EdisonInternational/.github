@@ -53,10 +53,30 @@ body:
     id: asset_name
     attributes:
       label: Asset Name
-      description: The asset name(s) to use for this build. Add one per line, matching the order of Target Env above.
+      description: The asset name(s) to use for this build. Add one per line, matching the order of Target Env above. Leave blank to default to <repo>-<target env>.
       placeholder: |
         self-service-node-webapp-qa
         self-service-node-webapp-st
+    validations:
+      required: false
+
+  - type: textarea
+    id: build_env
+    attributes:
+      label: Build Env
+      description: Build mode(s) passed to the build (npm run build:<value> / yarn --mode <value>). One per line, in the same order as Target Env above. Leave a line blank to build without a mode.
+      placeholder: |
+        development
+        staging
+    validations:
+      required: false
+
+  - type: input
+    id: release_build_env
+    attributes:
+      label: Release Build Env
+      description: Build mode used by the Build workflow (release/main builds). Leave blank to build without a mode.
+      placeholder: production
     validations:
       required: false
 
